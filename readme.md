@@ -1,7 +1,9 @@
 # Progetto Ciclilavarizia
 
 **Sede Betacom di Treviso**
-
+<p align="left">
+  <img src="./assets/BetacomLogoSquare.png" alt="Betacom Logo" width="250">
+</p>
 Team:
 
 * Gabriel Goxhaj
