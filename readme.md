@@ -1,9 +1,11 @@
 # Progetto Ciclilavarizia
 
 **Sede Betacom di Treviso**
+
 <p align="left">
   <img src="./assets/BetacomLogoSquare.png" alt="Betacom Logo" width="250">
 </p>
+
 Team:
 
 * Gabriel Goxhaj
@@ -42,8 +44,19 @@ Il sistema è composto da:
 ### Frontend
 
 * Angular
-* Angular Material / Bootstrap (se applicato)
 * TypeScript
+
+## Architettura del sistema
+
+Il sistema è progettato secondo una struttura client-server con comunicazione tramite **HTTP REST**. Sono presenti due aree principali:
+
+* **Pannello Admin**: gestione prodotti, dashboard
+* **Frontend Utente**: home, login, registrazione, catalogo biciclette, carrello, area personale
+
+Per la gestione del database sono stati utilizzati:
+
+* **Entity Framework (DbContext)** per la parte applicativa
+* **ADO.NET** per la gestione login e autenticazione
 
 ## Struttura del progetto
 
@@ -94,3 +107,4 @@ Il progetto ha lo scopo di consolidare le competenze acquisite durante il percor
 ## Licenza
 
 Progetto didattico interno Betacom — non destinato alla distribuzione commerciale.
+<!-- Attualmente questo è lo stato del progetto al 06 Novembre 2025 dopo la call su Discord, il tutto prende spunto dal Mural effettuato nella mattinata, il progetto può cambiare successivamente -->
