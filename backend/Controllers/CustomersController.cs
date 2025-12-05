@@ -19,18 +19,18 @@ namespace backend.Controllers
 
         // GET: api/Customers
         [HttpGet]
-        public async Task<ActionResult<ApiResponse<List<CustomerDto>>>> GetCustomers(int page = 1, int pageSize = 20)
+        public async Task<ActionResult<ApiResponse<List<CustomerDto>>>> GetCustomers(int page = 1, int size = 20)
         {
             var query = _context.Customers;
 
             var totalItems = await query.CountAsync();
 
-            var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+            var totalPages = (int)Math.Ceiling(totalItems / (double)size);
 
             var customers = await _context.Customers
                 .OrderBy(c => c.CustomerId)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
+                .Skip((page - 1) * size)
+                .Take(size)
                 .Select(c => new CustomerDto
                 {
                     CustomerId = c.CustomerId,
@@ -43,7 +43,7 @@ namespace backend.Controllers
             var pagination = new PaginationDto
             {
                 Page = page,
-                PageSize = pageSize,
+                PageSize = size,
                 TotalItems = totalItems,
                 TotalPages = totalPages
             };
@@ -55,6 +55,11 @@ namespace backend.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<ApiResponse<CustomerDto>>> GetCustomer(int id)
         {
+            if (id <= 0)
+            {
+                return BadRequest(ApiResponse<string>.Fail("Invalid customer ID"));
+            }
+
             var customer = await _context.Customers.FindAsync(id);
 
             if (customer == null)
@@ -76,13 +81,30 @@ namespace backend.Controllers
         // PUT: api/Customers/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCustomer(int id, CustomerUpdateDto dto)
+        public async Task<ActionResult<ApiResponse<CustomerDto>>> PutCustomer(int id, CustomerUpdateDto dto)
         {
+            if (id <= 0)
+            {
+                return BadRequest(ApiResponse<string>.Fail("Invalid customer ID") );
+            }
+
             var customer = await _context.Customers.FindAsync(id);
 
             if (customer == null)
             {
                 return NotFound(ApiResponse<string>.Fail("Customer not found"));
+            }
+
+            if (dto.FirstName == null && dto.LastName == null && dto.Email == null && dto.Phone == null)
+                return BadRequest(ApiResponse<string>.Fail("No fields to update"));
+
+            if (!string.IsNullOrWhiteSpace(dto.Email))
+            {
+                var emailExists = await _context.Customers
+                    .AnyAsync(c => c.EmailAddress == dto.Email && c.CustomerId != id);
+
+                if (emailExists)
+                    return Conflict(ApiResponse<string>.Fail("Email is already in use by another customer"));
             }
 
             if (dto.FirstName != null) customer.FirstName = dto.FirstName;
@@ -94,7 +116,15 @@ namespace backend.Controllers
 
             await _context.SaveChangesAsync();
 
-            return Ok(ApiResponse<string>.Success("Customer updated"));
+            var outputDto = new CustomerDto
+            {
+                CustomerId = customer.CustomerId,
+                FullName = $"{customer.FirstName} {customer.LastName}",
+                Email = customer.EmailAddress,
+                Phone = customer.Phone
+            };
+
+            return Ok(ApiResponse<CustomerDto>.Success(outputDto, "Customer updated"));
         }
 
         // POST: api/Customers
@@ -102,6 +132,12 @@ namespace backend.Controllers
         [HttpPost]
         public async Task<ActionResult<ApiResponse<CustomerDto>>> PostCustomer(CustomerCreateDto dto)
         {
+            var emailExists = await _context.Customers
+                .AnyAsync(c => c.EmailAddress == dto.Email);
+
+            if (emailExists)
+                return Conflict(ApiResponse<string>.Fail("Email is already registered"));
+
             var customer = new Customer
             {
                 FirstName = dto.FirstName,
@@ -136,6 +172,11 @@ namespace backend.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCustomer(int id)
         {
+            if (id <= 0)
+            {
+                return BadRequest(ApiResponse<string>.Fail("Invalid customer ID"));
+            }
+
             var customer = await _context.Customers.FindAsync(id);
 
             if (customer == null)
