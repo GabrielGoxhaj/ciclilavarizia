@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using backend.DTOs.Customers;
+using backend.Models;
+using Humanizer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using backend.Models;
-using backend.DTOs;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace backend.Controllers
 {
@@ -26,7 +27,7 @@ namespace backend.Controllers
         public async Task<ActionResult<IEnumerable<Customer>>> GetCustomers()
         {
             var customers = await _context.Customers
-                .Select(c => new CustomersDto
+                .Select(c => new CustomerDto
                 {
                     CustomerId = c.CustomerId,
                     FullName = $"{c.FirstName} {c.LastName}",
@@ -50,36 +51,37 @@ namespace backend.Controllers
                 return NotFound();
             }
 
-            return customer;
+            var customerDto = new CustomerDto
+            {
+                CustomerId = customer.CustomerId,
+                FullName = $"{customer.FirstName} {customer.LastName}",
+                Email = customer.EmailAddress,
+                Phone = customer.Phone
+            };
+
+            return Ok(customerDto);
         }
 
         // PUT: api/Customers/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCustomer(int id, Customer customer)
+        public async Task<IActionResult> PutCustomer(int id, CustomerUpdateDto dto)
         {
-            if (id != customer.CustomerId)
+            var customer = await _context.Customers.FindAsync(id);
+
+            if (customer == null)
             {
-                return BadRequest();
+                return NotFound();
             }
 
-            _context.Entry(customer).State = EntityState.Modified;
+            if (dto.FirstName != null) customer.FirstName = dto.FirstName;
+            if (dto.LastName != null) customer.LastName = dto.LastName;
+            if (dto.Email != null) customer.EmailAddress = dto.Email;
+            if (dto.Phone != null) customer.Phone = dto.Phone;
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CustomerExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            customer.ModifiedDate = DateTime.Now;
+
+            _context.SaveChanges();
 
             return NoContent();
         }
@@ -87,12 +89,24 @@ namespace backend.Controllers
         // POST: api/Customers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Customer>> PostCustomer(Customer customer)
+        public async Task<ActionResult<Customer>> PostCustomer(CustomerCreateDto dto)
         {
+            var customer = new Customer
+            {
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
+                EmailAddress = dto.Email,
+                Phone = dto.Phone,
+                //PasswordHash = HashPassword(customer.Password),
+                //PasswordSalt = GenerateSalt(),
+                ModifiedDate = DateTime.Now
+            };
+
             _context.Customers.Add(customer);
+
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetCustomer", new { id = customer.CustomerId }, customer);
+            return CreatedAtAction("GetCustomer", new { id = customer.CustomerId }, dto);
         }
 
         // DELETE: api/Customers/5
@@ -100,6 +114,7 @@ namespace backend.Controllers
         public async Task<IActionResult> DeleteCustomer(int id)
         {
             var customer = await _context.Customers.FindAsync(id);
+
             if (customer == null)
             {
                 return NotFound();

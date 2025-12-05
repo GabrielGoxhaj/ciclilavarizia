@@ -1,6 +1,6 @@
-﻿namespace backend.DTOs
+﻿namespace backend.DTOs.Customers
 {
-    public class CustomersDto
+    public class CustomerDto
     {
         public int CustomerId { get; set; }
         public string FullName { get; set; } = string.Empty;
