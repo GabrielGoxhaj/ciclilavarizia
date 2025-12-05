@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using backend.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace backend.Models;
+namespace backend.Data;
 
 public partial class AdventureWorksLt2019Context : DbContext
 {
