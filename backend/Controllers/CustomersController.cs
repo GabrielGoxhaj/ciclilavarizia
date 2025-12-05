@@ -1,8 +1,10 @@
 ﻿using backend.DTOs.Customers;
+using backend.DTOs.Response;
 using backend.Models;
 using Humanizer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Build.Tasks;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -24,9 +26,18 @@ namespace backend.Controllers
 
         // GET: api/Customers
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Customer>>> GetCustomers()
+        public async Task<ActionResult<ApiResponse<List<CustomerDto>>>> GetCustomers( int page = 1 , int pageSize = 20 )
         {
+            var query = _context.Customers;
+
+            var totalItems = await query.CountAsync();
+
+            var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
             var customers = await _context.Customers
+                .OrderBy(c => c.CustomerId)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .Select(c => new CustomerDto
                 {
                     CustomerId = c.CustomerId,
@@ -34,10 +45,17 @@ namespace backend.Controllers
                     Email = c.EmailAddress,
                     Phone = c.Phone
                 })
-                .Take(20)
                 .ToListAsync();
 
-            return Ok(customers);
+            var pagination = new PaginationDto
+            {
+                Page = page,
+                PageSize = pageSize,
+                TotalItems = totalItems,
+                TotalPages = totalPages
+            };
+
+            return Ok(ApiResponse<List<CustomerDto>>.Success(customers, "Customers retrieved", pagination));
         }
 
         // GET: api/Customers/5
@@ -59,7 +77,7 @@ namespace backend.Controllers
                 Phone = customer.Phone
             };
 
-            return Ok(customerDto);
+            return Ok(ApiResponse<CustomerDto>.Success(customerDto, "Customer retrieved") );
         }
 
         // PUT: api/Customers/5
@@ -71,7 +89,7 @@ namespace backend.Controllers
 
             if (customer == null)
             {
-                return NotFound();
+                return NotFound(ApiResponse<string>.Fail("Customer not found"));
             }
 
             if (dto.FirstName != null) customer.FirstName = dto.FirstName;
