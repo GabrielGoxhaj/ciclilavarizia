@@ -26,7 +26,7 @@ namespace backend.Controllers
 
         // GET: api/Customers
         [HttpGet]
-        public async Task<ActionResult<ApiResponse<List<CustomerDto>>>> GetCustomers( int page = 1 , int pageSize = 20 )
+        public async Task<ActionResult<ApiResponse<List<CustomerDto>>>> GetCustomers(int page = 1, int pageSize = 20)
         {
             var query = _context.Customers;
 
@@ -60,16 +60,16 @@ namespace backend.Controllers
 
         // GET: api/Customers/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Customer>> GetCustomer(int id)
+        public async Task<ActionResult<ApiResponse<CustomerDto>>> GetCustomer(int id)
         {
             var customer = await _context.Customers.FindAsync(id);
 
             if (customer == null)
             {
-                return NotFound();
+                return NotFound(ApiResponse<string>.Fail("Customer not found"));
             }
 
-            var customerDto = new CustomerDto
+            var dto = new CustomerDto
             {
                 CustomerId = customer.CustomerId,
                 FullName = $"{customer.FirstName} {customer.LastName}",
@@ -77,7 +77,7 @@ namespace backend.Controllers
                 Phone = customer.Phone
             };
 
-            return Ok(ApiResponse<CustomerDto>.Success(customerDto, "Customer retrieved") );
+            return Ok(ApiResponse<CustomerDto>.Success(dto, "Customer retrieved"));
         }
 
         // PUT: api/Customers/5
@@ -99,15 +99,15 @@ namespace backend.Controllers
 
             customer.ModifiedDate = DateTime.Now;
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Ok(ApiResponse<string>.Success("Customer updated"));
         }
 
         // POST: api/Customers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Customer>> PostCustomer(CustomerCreateDto dto)
+        public async Task<ActionResult<ApiResponse<CustomerDto>>> PostCustomer(CustomerCreateDto dto)
         {
             var customer = new Customer
             {
@@ -124,7 +124,19 @@ namespace backend.Controllers
 
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetCustomer", new { id = customer.CustomerId }, dto);
+            var outputDto = new CustomerDto
+            {
+                CustomerId = customer.CustomerId,
+                FullName = $"{customer.FirstName} {customer.LastName}",
+                Email = customer.EmailAddress,
+                Phone = customer.Phone
+            };
+
+            return CreatedAtAction(
+                    nameof(GetCustomer),
+                    new { id = customer.CustomerId },
+                    ApiResponse<CustomerDto>.Success(outputDto, "Customer created")
+                   );
         }
 
         // DELETE: api/Customers/5
@@ -135,13 +147,13 @@ namespace backend.Controllers
 
             if (customer == null)
             {
-                return NotFound();
+                return NotFound(ApiResponse<string>.Fail("Customer Not Found"));
             }
 
             _context.Customers.Remove(customer);
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Ok(ApiResponse<string>.Success("Customer deleted"));
         }
 
         private bool CustomerExists(int id)
