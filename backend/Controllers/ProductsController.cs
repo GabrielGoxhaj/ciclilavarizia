@@ -60,7 +60,7 @@ namespace backend.Controllers
                 TotalPages = totalPages
             };
 
-            return Ok(ApiResponse<List<ProductDto>>.Success(products, pagination: pagination));
+            return Ok(ApiResponse<List<ProductDto>>.Success(products, "Products retrieved", pagination));
         }
             // GET: api/Products/5
         [HttpGet("{id}")]
@@ -68,14 +68,14 @@ namespace backend.Controllers
         {
             if (id <= 0)
             {
-                return BadRequest(ApiResponse<string>.Fail("Invalid product Id"));
+                return BadRequest(ApiResponse<string>.Fail("Invalid product ID"));
             }
 
             var product = await _context.Products.FindAsync(id);
 
             if (product == null)
             {
-                return NotFound(ApiResponse<string>.Fail("Customer not found"));
+                return NotFound(ApiResponse<string>.Fail("Product not found"));
             }
 
             var dto = new ProductDto
@@ -90,66 +90,114 @@ namespace backend.Controllers
                 ProductCategoryId = product.ProductCategoryId
             };
 
-            return Ok(ApiResponse<ProductDto>.Success(dto, "Customer retrieved"));
+            return Ok(ApiResponse<ProductDto>.Success(dto, "Product retrieved"));
 
         }
 
         // PUT: api/Products/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutProduct(int id, Product product)
+        public async Task<IActionResult> PutProduct(int id, ProductUpdateDto dto)
         {
-            if (id != product.ProductId)
+
+            if (id <= 0)
             {
-                return BadRequest();
+                return BadRequest(ApiResponse<string>.Fail("Invalid product ID"));
             }
 
-            _context.Entry(product).State = EntityState.Modified;
+            var product = await _context.Products.FindAsync(id);
 
-            try
+            if (product == null)
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ProductExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return NotFound(ApiResponse<string>.Fail("Product not found"));
             }
 
-            return NoContent();
+            // Update only the fields that are provided in the DTO
+            if (dto.Name != null)
+                product.Name = dto.Name;
+            if (dto.ProductNumber != null)
+                product.ProductNumber = dto.ProductNumber;
+            if (dto.Color != null)
+                product.Color = dto.Color;
+            if (dto.ListPrice.HasValue)
+                product.ListPrice = dto.ListPrice.Value;
+            if (dto.Size != null)
+                product.Size = dto.Size;
+            if (dto.Weight.HasValue)
+                product.Weight = dto.Weight.Value;
+            if (dto.ProductCategoryId.HasValue)
+                product.ProductCategoryId = dto.ProductCategoryId.Value;
+            if (dto.ProductModelId.HasValue)
+                product.ProductModelId = dto.ProductModelId.Value;
+            product.ModifiedDate = DateTime.UtcNow;
+
+
+
+            return Ok(ApiResponse<string>.Success("Product updated successfully"));
         }
 
         // POST: api/Products
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Product>> PostProduct(Product product)
+        public async Task<ActionResult<ApiResponse<ProductCreateDto>>> PostProduct(ProductCreateDto dto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ApiResponse<string>.Fail("Invalid data provided"));
+
+            var product = new Product
+            {
+                Name = dto.Name,
+                ProductNumber = dto.ProductNumber,
+                Color = dto.Color,
+                Size = dto.Size,
+                Weight = dto.Weight,
+                ListPrice = dto.ListPrice,
+                ProductCategoryId = dto.ProductCategoryId,
+                ModifiedDate = DateTime.Now
+            };
+
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetProduct", new { id = product.ProductId }, product);
+            var outputDto = new ProductDto
+            {
+                ProductId = product.ProductId,
+                Name = product.Name,
+                ProductNumber = product.ProductNumber,
+                Color = product.Color,
+                Size = product.Size,
+                Weight = product.Weight,
+                ListPrice = product.ListPrice,
+                ProductCategoryId = product.ProductCategoryId
+            };
+
+            return CreatedAtAction(
+                nameof(GetProduct),
+                new { id = product.ProductId },
+                ApiResponse<ProductDto>.Success(outputDto, "Product created")
+            );
         }
 
         // DELETE: api/Products/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(int id)
         {
+            if (id <= 0)
+            {
+                return BadRequest(ApiResponse<string>.Fail("Invalid product ID"));
+            }
+
             var product = await _context.Products.FindAsync(id);
+
             if (product == null)
             {
-                return NotFound();
+                return NotFound(ApiResponse<string>.Fail("Products not found"));
             }
 
             _context.Products.Remove(product);
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Ok(ApiResponse<string>.Success("Customer deleted"));
         }
 
         private bool ProductExists(int id)
