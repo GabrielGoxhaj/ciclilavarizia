@@ -22,9 +22,8 @@ namespace backend.Controllers
         [HttpGet]
         public async Task<ActionResult<ApiResponse<List<CustomerDto>>>> GetCustomers(int page = 1, int size = 20)
         {
-            var query = _context.Customers;
-
-            var totalItems = await query.CountAsync();
+            
+            var totalItems = await _context.Customers.CountAsync();
 
             var totalPages = (int)Math.Ceiling(totalItems / (double)size);
 

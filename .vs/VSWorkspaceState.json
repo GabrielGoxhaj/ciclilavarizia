@@ -1,7 +1,11 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\backend",
+    "\\backend\\DTOs",
+    "\\backend\\DTOs\\Customers",
+    "\\backend\\DTOs\\Response"
   ],
-  "SelectedNode": "\\backend.sln",
+  "SelectedNode": "\\backend\\backend.sln",
   "PreviewInSolutionExplorer": false
 }
