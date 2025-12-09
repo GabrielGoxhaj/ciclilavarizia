@@ -1,17 +1,7 @@
-﻿using backend.Data;
-using backend.DTOs.Customers;
-using backend.DTOs.Products;
+﻿using backend.DTOs.Products;
 using backend.DTOs.Response;
-using backend.Models;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
+using backend.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace backend.Controllers
 {
@@ -19,190 +9,95 @@ namespace backend.Controllers
     [ApiController]
     public class ProductsController : ControllerBase
     {
-        private readonly AdventureWorksLt2019Context _context;
+        private readonly IProductService _service;
 
-        public ProductsController(AdventureWorksLt2019Context context)
+        public ProductsController(IProductService service)
         {
-            _context = context;
+            _service = service;
         }
 
         // GET: api/Products
         [HttpGet]
-        public async Task<ActionResult<ApiResponse<List<ProductDto>>>> GetProducts(int page = 1, int size = 20)
+        public async Task<ActionResult> GetAllProducts(int page = 1, int size = 20)
         {
-            var totalItems = await _context.Products.CountAsync();
+            var response = await _service.GetAllProductsAsync(page, size);
 
-            var totalPages = (int)Math.Ceiling(totalItems / (double)size);
-
-            var products = await _context.Products
-                .OrderBy(c => c.ProductId)
-                .Skip((page - 1) * size)
-                .Take(size)
-                .Select(p => new ProductDto
-                {
-                    ProductId = p.ProductId,
-                    Name = p.Name,
-                    ProductNumber = p.ProductNumber,
-                    Color = p.Color,
-                    ListPrice = p.ListPrice,
-                    Size = p.Size,
-                    Weight = p.Weight,
-                    ProductCategoryId = p.ProductCategoryId
-                }
-                )
-                .ToListAsync();
-
-            var pagination = new PaginationDto
-            {
-                Page = page,
-                PageSize = size,
-                TotalItems = totalItems,
-                TotalPages = totalPages
-            };
-
-            return Ok(ApiResponse<List<ProductDto>>.Success(products, "Products retrieved", pagination));
+            return Ok(response);
         }
-            // GET: api/Products/5
+
+        // GET: api/Products/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<ApiResponse<ProductDto>>> GetProduct(int id)
+        public async Task<ActionResult> GetProduct(int id)
         {
             if (id <= 0)
             {
                 return BadRequest(ApiResponse<string>.Fail("Invalid product ID"));
             }
 
-            var product = await _context.Products.FindAsync(id);
+            var response = await _service.GetProductByIdAsync(id);
 
-            if (product == null)
-            {
-                return NotFound(ApiResponse<string>.Fail("Product not found"));
-            }
+            return Ok(response);
 
-            var dto = new ProductDto
-            {
-                ProductId = product.ProductId,
-                Name = product.Name,
-                ProductNumber = product.ProductNumber,
-                Color = product.Color,
-                ListPrice = product.ListPrice,
-                Size = product.Size,
-                Weight = product.Weight,
-                ProductCategoryId = product.ProductCategoryId
-            };
-
-            return Ok(ApiResponse<ProductDto>.Success(dto, "Product retrieved"));
-
-        }
-
-        // PUT: api/Products/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutProduct(int id, ProductUpdateDto dto)
-        {
-
-            if (id <= 0)
-            {
-                return BadRequest(ApiResponse<string>.Fail("Invalid product ID"));
-            }
-
-            var product = await _context.Products.FindAsync(id);
-
-            if (product == null)
-            {
-                return NotFound(ApiResponse<string>.Fail("Product not found"));
-            }
-
-            // Update only the fields that are provided in the DTO
-            if (dto.Name != null)
-                product.Name = dto.Name;
-            if (dto.ProductNumber != null)
-                product.ProductNumber = dto.ProductNumber;
-            if (dto.Color != null)
-                product.Color = dto.Color;
-            if (dto.ListPrice.HasValue)
-                product.ListPrice = dto.ListPrice.Value;
-            if (dto.Size != null)
-                product.Size = dto.Size;
-            if (dto.Weight.HasValue)
-                product.Weight = dto.Weight.Value;
-            if (dto.ProductCategoryId.HasValue)
-                product.ProductCategoryId = dto.ProductCategoryId.Value;
-            if (dto.ProductModelId.HasValue)
-                product.ProductModelId = dto.ProductModelId.Value;
-            product.ModifiedDate = DateTime.UtcNow;
-
-
-
-            return Ok(ApiResponse<string>.Success("Product updated successfully"));
         }
 
         // POST: api/Products
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<ApiResponse<ProductCreateDto>>> PostProduct(ProductCreateDto dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ApiResponse<string>.Fail("Invalid data provided"));
-
-            var product = new Product
+            try
             {
-                Name = dto.Name,
-                ProductNumber = dto.ProductNumber,
-                Color = dto.Color,
-                Size = dto.Size,
-                Weight = dto.Weight,
-                ListPrice = dto.ListPrice,
-                ProductCategoryId = dto.ProductCategoryId,
-                ModifiedDate = DateTime.Now
-            };
+                if (dto == null)
+                {
+                    return BadRequest(ApiResponse<string>.Fail("Product data cannot be null"));
+                }
 
-            _context.Products.Add(product);
-            await _context.SaveChangesAsync();
-
-            var outputDto = new ProductDto
+                var response = await _service.CreateProductAsync(dto);
+                return Ok(response);
+            } catch (Exception ex)
             {
-                ProductId = product.ProductId,
-                Name = product.Name,
-                ProductNumber = product.ProductNumber,
-                Color = product.Color,
-                Size = product.Size,
-                Weight = product.Weight,
-                ListPrice = product.ListPrice,
-                ProductCategoryId = product.ProductCategoryId
-            };
+                return StatusCode(500, ApiResponse<string>.Error("An error occurred while creating the product."));
+            }
+        }
 
-            return CreatedAtAction(
-                nameof(GetProduct),
-                new { id = product.ProductId },
-                ApiResponse<ProductDto>.Success(outputDto, "Product created")
-            );
+        // PUT: api/Products/5
+        [HttpPut("{id}")]
+        public async Task<ActionResult<ApiResponse<ProductDto>>> PutProduct(int id, ProductUpdateDto dto)
+        {
+            try 
+            {
+                var response = await _service.UpdateProductAsync(id, dto);
+
+                if (response.Data == null)
+                { 
+                    return NotFound(response);
+                }
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ApiResponse<string>.Error("An error occurred while updating the product."));
+            }
         }
 
         // DELETE: api/Products/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProduct(int id)
+        public async Task<ActionResult<ApiResponse<string>>> DeleteProduct(int id)
         {
-            if (id <= 0)
+            try
             {
-                return BadRequest(ApiResponse<string>.Fail("Invalid product ID"));
+                var response = await _service.DeleteProductAsync(id);
+
+                if (response.Status == "failure")
+                    return NotFound(response);
+
+                return Ok(response);
             }
-
-            var product = await _context.Products.FindAsync(id);
-
-            if (product == null)
+            catch (Exception ex)
             {
-                return NotFound(ApiResponse<string>.Fail("Products not found"));
+                return StatusCode(500, ApiResponse<string>.Error(ex.Message));
             }
-
-            _context.Products.Remove(product);
-            await _context.SaveChangesAsync();
-
-            return Ok(ApiResponse<string>.Success("Customer deleted"));
         }
 
-        private bool ProductExists(int id)
-        {
-            return _context.Products.Any(e => e.ProductId == id);
-        }
     }
 }

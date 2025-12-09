@@ -18,6 +18,7 @@ namespace backend
 
             // Registrazione dei servizi personalizzati
             builder.Services.AddScoped<ICustomerService, CustomerService>();
+            builder.Services.AddScoped<IProductService, ProductService>();
 
             // Db Context
             builder.Services.AddDbContext<AdventureWorksLt2019Context>(options =>
