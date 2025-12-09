@@ -19,8 +19,15 @@ namespace backend.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateOrder(CreateOrderDto dto)
         {
-            var created = await _orderService.CreateOrderAsync(dto);
-            return Ok(created);
+            try
+            {
+               var created = await _orderService.CreateOrderAsync(dto);
+               return Ok(created);
+            }
+            catch (Exception ex)
+            {
+               return StatusCode(500, new { message = ex.Message});
+            }
         }
 
         [HttpGet("{id}")]

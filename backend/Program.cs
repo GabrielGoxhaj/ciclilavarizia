@@ -1,4 +1,6 @@
 using backend.Data;
+using backend.Services;
+using backend.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend
@@ -9,15 +11,17 @@ namespace backend
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            
-            // Connessione al database
-            builder.Services.AddDbContext<AdventureWorksLt2019Context>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
             // Add services to the container.
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            // Registrazione dei servizi personalizzati
+            builder.Services.AddScoped<ICustomerService, CustomerService>();
+
+            // Db Context
+            builder.Services.AddDbContext<AdventureWorksLt2019Context>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             var app = builder.Build();
 

@@ -2,6 +2,7 @@
 using backend.DTOs.Customers;
 using backend.DTOs.Response;
 using backend.Models;
+using backend.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,120 +12,34 @@ namespace backend.Controllers
     [ApiController]
     public class CustomersController : ControllerBase
     {
-        private readonly AdventureWorksLt2019Context _context;
+        private readonly ICustomerService _service;
 
-        public CustomersController(AdventureWorksLt2019Context context)
+        public CustomersController(ICustomerService service)
         {
-            _context = context;
+            _service = service;
         }
 
         // GET: api/Customers
         [HttpGet]
-        public async Task<ActionResult<ApiResponse<List<CustomerDto>>>> GetCustomers(int page = 1, int size = 20)
+        public async Task<IActionResult> GetCustomers(int page = 1, int pageSize = 20)
         {
-            
-            var totalItems = await _context.Customers.CountAsync();
+            var response = await _service.GetAllCustomersAsync(page, pageSize);
 
-            var totalPages = (int)Math.Ceiling(totalItems / (double)size);
-
-            var customers = await _context.Customers
-                .OrderBy(c => c.CustomerId)
-                .Skip((page - 1) * size)
-                .Take(size)
-                .Select(c => new CustomerDto
-                {
-                    CustomerId = c.CustomerId,
-                    FullName = $"{c.FirstName} {c.LastName}",
-                    Email = c.EmailAddress,
-                    Phone = c.Phone
-                })
-                .ToListAsync();
-
-            var pagination = new PaginationDto
-            {
-                Page = page,
-                PageSize = size,
-                TotalItems = totalItems,
-                TotalPages = totalPages
-            };
-
-            return Ok(ApiResponse<List<CustomerDto>>.Success(customers, "Customers retrieved", pagination));
+            return Ok(response);
         }
 
         // GET: api/Customers/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<ApiResponse<CustomerDto>>> GetCustomer(int id)
+        public async Task<IActionResult> GetCustomer(int id)
         {
             if (id <= 0)
             {
                 return BadRequest(ApiResponse<string>.Fail("Invalid customer ID"));
             }
 
-            var customer = await _context.Customers.FindAsync(id);
+            var response = await _service.GetCustomerByIdAsync(id);
 
-            if (customer == null)
-            {
-                return NotFound(ApiResponse<string>.Fail("Customer not found"));
-            }
-
-            var dto = new CustomerDto
-            {
-                CustomerId = customer.CustomerId,
-                FullName = $"{customer.FirstName} {customer.LastName}",
-                Email = customer.EmailAddress,
-                Phone = customer.Phone
-            };
-
-            return Ok(ApiResponse<CustomerDto>.Success(dto, "Customer retrieved"));
-        }
-
-        // PUT: api/Customers/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<ActionResult<ApiResponse<CustomerDto>>> PutCustomer(int id, CustomerUpdateDto dto)
-        {
-            if (id <= 0)
-            {
-                return BadRequest(ApiResponse<string>.Fail("Invalid customer ID") );
-            }
-
-            var customer = await _context.Customers.FindAsync(id);
-
-            if (customer == null)
-            {
-                return NotFound(ApiResponse<string>.Fail("Customer not found"));
-            }
-
-            if (dto.FirstName == null && dto.LastName == null && dto.Email == null && dto.Phone == null)
-                return BadRequest(ApiResponse<string>.Fail("No fields to update"));
-
-            if (!string.IsNullOrWhiteSpace(dto.Email))
-            {
-                var emailExists = await _context.Customers
-                    .AnyAsync(c => c.EmailAddress == dto.Email && c.CustomerId != id);
-
-                if (emailExists)
-                    return Conflict(ApiResponse<string>.Fail("Email is already in use by another customer"));
-            }
-
-            if (dto.FirstName != null) customer.FirstName = dto.FirstName;
-            if (dto.LastName != null) customer.LastName = dto.LastName;
-            if (dto.Email != null) customer.EmailAddress = dto.Email;
-            if (dto.Phone != null) customer.Phone = dto.Phone;
-
-            customer.ModifiedDate = DateTime.Now;
-
-            await _context.SaveChangesAsync();
-
-            var outputDto = new CustomerDto
-            {
-                CustomerId = customer.CustomerId,
-                FullName = $"{customer.FirstName} {customer.LastName}",
-                Email = customer.EmailAddress,
-                Phone = customer.Phone
-            };
-
-            return Ok(ApiResponse<CustomerDto>.Success(outputDto, "Customer updated"));
+            return Ok(response);
         }
 
         // POST: api/Customers
@@ -132,40 +47,42 @@ namespace backend.Controllers
         [HttpPost]
         public async Task<ActionResult<ApiResponse<CustomerDto>>> PostCustomer(CustomerCreateDto dto)
         {
-            var emailExists = await _context.Customers
-                .AnyAsync(c => c.EmailAddress == dto.Email);
-
-            if (emailExists)
-                return Conflict(ApiResponse<string>.Fail("Email is already registered"));
-
-            var customer = new Customer
+            try
             {
-                FirstName = dto.FirstName,
-                LastName = dto.LastName,
-                EmailAddress = dto.Email,
-                Phone = dto.Phone,
-                //PasswordHash = HashPassword(customer.Password),
-                //PasswordSalt = GenerateSalt(),
-                ModifiedDate = DateTime.Now
-            };
+                var response = await _service.CreateCustomerAsync(dto);
 
-            _context.Customers.Add(customer);
+                if (response == null)
+                {
+                    return BadRequest(ApiResponse<string>.Fail("Failed to create customer"));
+                }
 
-            await _context.SaveChangesAsync();
-
-            var outputDto = new CustomerDto
+                return CreatedAtAction(
+                     nameof(GetCustomer),
+                     new { id = response.Data.CustomerId },
+                     response
+                );
+            }
+            catch (Exception ex)
             {
-                CustomerId = customer.CustomerId,
-                FullName = $"{customer.FirstName} {customer.LastName}",
-                Email = customer.EmailAddress,
-                Phone = customer.Phone
-            };
+                return StatusCode(500, ApiResponse<string>.Error(ex.Message));
+            }
 
-            return CreatedAtAction(
-                    nameof(GetCustomer),
-                    new { id = customer.CustomerId },
-                    ApiResponse<CustomerDto>.Success(outputDto, "Customer created")
-                   );
+        }
+
+        // PUT: api/Customers/5
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPut("{id}")]
+        public async Task<ActionResult> PutCustomer(int id, CustomerUpdateDto dto)
+        {
+            try
+            {
+                var response = await _service.UpdateCustomerAsync(id, dto);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ApiResponse<string>.Error(ex.Message));
+            }
         }
 
         // DELETE: api/Customers/5
@@ -177,22 +94,9 @@ namespace backend.Controllers
                 return BadRequest(ApiResponse<string>.Fail("Invalid customer ID"));
             }
 
-            var customer = await _context.Customers.FindAsync(id);
+            var response = await _service.DeleteCustomerAsync(id);
 
-            if (customer == null)
-            {
-                return NotFound(ApiResponse<string>.Fail("Customer Not Found"));
-            }
-
-            _context.Customers.Remove(customer);
-            await _context.SaveChangesAsync();
-
-            return Ok(ApiResponse<string>.Success("Customer deleted"));
-        }
-
-        private bool CustomerExists(int id)
-        {
-            return _context.Customers.Any(e => e.CustomerId == id);
+            return Ok(response);
         }
     }
 }

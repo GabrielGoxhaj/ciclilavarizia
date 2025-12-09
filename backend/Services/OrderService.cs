@@ -17,7 +17,21 @@ namespace backend.Services
 
         public async Task<OrderDto> CreateOrderAsync(CreateOrderDto dto)
         {
+            // Validazione DTO
+            if (dto == null)
+                throw new ArgumentException("Order data cannot be null.");
+
+            if (dto.Items == null || dto.Items.Count == 0)
+                throw new ArgumentException("The order must contain at least one item.");
+
+            // Validazione cliente esistente
+            var customerExists = await _context.Customers.AnyAsync(c => c.CustomerId == dto.CustomerId);
+            if(!customerExists)
+                throw new Exception("Customer not found.");
+
+            // Verifica che tutti i prodotti esistano
             var productIds = dto.Items.Select(i => i.ProductId).ToList();
+
             var products = await _context.Products
                 .Where(p => productIds.Contains(p.ProductId))
                 .ToListAsync();
@@ -25,6 +39,7 @@ namespace backend.Services
             if (products.Count != productIds.Count)
                 throw new Exception("One or more products not found.");
 
+            // Calcoli e creazione header 
             decimal subTotal = 0;
 
             var orderHeader = new SalesOrderHeader
@@ -42,6 +57,7 @@ namespace backend.Services
             _context.SalesOrderHeaders.Add(orderHeader);
             await _context.SaveChangesAsync();
 
+            // Creazione dettagli ordine
             foreach (var item in dto.Items)
             {
                 var product = products.First(p => p.ProductId == item.ProductId);
@@ -60,6 +76,7 @@ namespace backend.Services
                 _context.SalesOrderDetails.Add(orderDetail);
 
             }
+
             // Calcoli finali
             orderHeader.SubTotal = subTotal;
             orderHeader.TaxAmt = subTotal * 0.22m; // IVA 22%
@@ -68,9 +85,9 @@ namespace backend.Services
 
             await _context.SaveChangesAsync();
 
+            // Restituzione ordine completo
             return await GetOrderByIdAsync(orderHeader.SalesOrderId)
                     ?? throw new Exception("Errore nel recupero dell'ordine creato.");
-
 
         }
         public async Task<OrderDto?> GetOrderByIdAsync(int orderId)
