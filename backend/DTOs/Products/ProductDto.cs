@@ -10,6 +10,10 @@
         public string? Size { get; set; }
         public decimal? Weight { get; set; }
         public int? ProductCategoryId { get; set; }
+        public ProductCategoryDto? Category { get; set; }
         public int? ProductModelId { get; set; }
+        public ProductModelDto? Model { get; set; }
+
+        public ProductDescriptionDto? Description { get; set; }
     }
 }

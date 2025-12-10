@@ -20,11 +20,14 @@ namespace backend.Services
         public async Task<ApiResponse<List<ProductDto>>> GetAllProductsAsync(int page = 1, int pageSize = 20)
         {
             var totalItems = await _context.Products.CountAsync();
-
             var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
 
             var products = await _context.Products
-                .OrderBy(c => c.ProductId)
+                .Include(p => p.ProductCategory)
+                .Include(p => p.ProductModel)
+                    .ThenInclude(pm => pm.ProductModelProductDescriptions)
+                        .ThenInclude(pmpd => pmpd.ProductDescription)
+                .OrderBy(p => p.ProductId)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .Select(p => new ProductDto
@@ -36,10 +39,45 @@ namespace backend.Services
                     ListPrice = p.ListPrice,
                     Size = p.Size,
                     Weight = p.Weight,
-                    ProductCategoryId = p.ProductCategoryId
-                }
-                )
+
+                    ProductCategoryId = p.ProductCategoryId,
+                    Category = p.ProductCategory == null ? null : new ProductCategoryDto
+                    {
+                        ProductCategoryId = p.ProductCategory.ProductCategoryId,
+                        Name = p.ProductCategory.Name,
+                        ParentProductCategoryId = p.ProductCategory.ParentProductCategoryId
+                    },
+
+                    ProductModelId = p.ProductModelId,
+                    Model = p.ProductModel == null ? null : new ProductModelDto
+                    {
+                        ProductModelId = p.ProductModel.ProductModelId,
+                        Name = p.ProductModel.Name
+                    },
+
+                    // Step 1: selezioniamo SOLO l'ID della descrizione
+                    Description = null // lo riempiamo dopo fuori dal LINQ
+                })
                 .ToListAsync();
+
+            // Step 2: ora che i dati sono in memoria, possiamo mappare la descrizione
+            foreach (var product in products)
+            {
+                var productEntity = await _context.Products
+                    .Include(p => p.ProductModel)
+                        .ThenInclude(pm => pm.ProductModelProductDescriptions)
+                            .ThenInclude(pmpd => pmpd.ProductDescription)
+                    .FirstAsync(p => p.ProductId == product.ProductId);
+
+                product.Description = productEntity.ProductModel?
+                    .ProductModelProductDescriptions
+                    .Select(d => new ProductDescriptionDto
+                    {
+                        ProductDescriptionId = d.ProductDescription.ProductDescriptionId,
+                        Description = d.ProductDescription.Description
+                    })
+                    .FirstOrDefault();
+            }
 
             var pagination = new PaginationDto
             {
@@ -53,7 +91,12 @@ namespace backend.Services
         }
         public async Task<ApiResponse<ProductDto>> GetProductByIdAsync(int id)
         {
-            var product = await _context.Products.FindAsync(id);
+            var product = await _context.Products
+                .Include(p => p.ProductCategory)
+                .Include(p => p.ProductModel)
+                   .ThenInclude(pm => pm.ProductModelProductDescriptions)
+                      .ThenInclude(pmpd => pmpd.ProductDescription)
+                .FirstOrDefaultAsync(p => p.ProductId == id);
 
             if (product == null)
             {
@@ -69,7 +112,26 @@ namespace backend.Services
                 ListPrice = product.ListPrice,
                 Size = product.Size,
                 Weight = product.Weight,
-                ProductCategoryId = product.ProductCategoryId
+                ProductCategoryId = product.ProductCategoryId,
+                Category = product.ProductCategory == null ? null : new ProductCategoryDto
+                {
+                    ProductCategoryId = product.ProductCategory.ProductCategoryId,
+                    Name = product.ProductCategory.Name,
+                    ParentProductCategoryId = product.ProductCategory.ParentProductCategoryId
+                },
+                ProductModelId = product.ProductModelId,
+                Model = product.ProductModel == null ? null : new ProductModelDto
+                {
+                    ProductModelId = product.ProductModel.ProductModelId,
+                    Name = product.ProductModel.Name
+                },
+                Description = product.ProductModel == null ? null : product.ProductModel.ProductModelProductDescriptions
+                    .Select(d => new ProductDescriptionDto
+                    {
+                        ProductDescriptionId = d.ProductDescription.ProductDescriptionId,
+                        Description = d.ProductDescription.Description
+                    })
+                    .FirstOrDefault()
             };
             return ApiResponse<ProductDto>.Success(dto, "Product retrieved");
         }
