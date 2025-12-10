@@ -1,6 +1,8 @@
 ﻿using backend.DTOs.Products;
 using backend.DTOs.Response;
+using backend.Services;
 using backend.Services.Interfaces;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers
@@ -97,6 +99,13 @@ namespace backend.Controllers
             {
                 return StatusCode(500, ApiResponse<string>.Error(ex.Message));
             }
+        }
+
+        [HttpGet("catalog")]
+        public async Task<ActionResult<ApiResponse<ProductCatalogDto>>> GetCatalog()
+        {
+            var respone = await _service.GetCatalogAsync();
+            return Ok(respone);
         }
 
     }

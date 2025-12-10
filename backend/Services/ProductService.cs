@@ -220,5 +220,108 @@ namespace backend.Services
 
             return ApiResponse<string>.Success("Product deleted");
         }
+
+        public async Task<ApiResponse<ProductCatalogDto>> GetCatalogAsync()
+        {
+            // 1️⃣ Carichiamo TUTTE le descrizioni dei modelli in un'unica query
+            var modelDescriptions = await _context.ProductModels
+                .Include(pm => pm.ProductModelProductDescriptions)
+                    .ThenInclude(pd => pd.ProductDescription)
+                .ToDictionaryAsync(
+                    pm => pm.ProductModelId,
+                    pm => pm.ProductModelProductDescriptions
+                        .Select(d => new ProductDescriptionDto
+                        {
+                            ProductDescriptionId = d.ProductDescription.ProductDescriptionId,
+                            Description = d.ProductDescription.Description
+                        })
+                        .FirstOrDefault()
+                );
+
+            // 2️⃣ Carichiamo i prodotti (categoria + modello), senza descrizione
+            var products = await _context.Products
+                .Include(p => p.ProductCategory)
+                .Include(p => p.ProductModel)
+                .OrderBy(p => p.Name)
+                .Select(p => new ProductDto
+                {
+                    ProductId = p.ProductId,
+                    Name = p.Name,
+                    ProductNumber = p.ProductNumber,
+                    Color = p.Color,
+                    ListPrice = p.ListPrice,
+                    Size = p.Size,
+                    Weight = p.Weight,
+
+                    ProductCategoryId = p.ProductCategoryId,
+                    Category = p.ProductCategory == null ? null : new ProductCategoryDto
+                    {
+                        ProductCategoryId = p.ProductCategory.ProductCategoryId,
+                        Name = p.ProductCategory.Name,
+                        ParentProductCategoryId = p.ProductCategory.ParentProductCategoryId
+                    },
+
+                    ProductModelId = p.ProductModelId,
+                    Model = p.ProductModel == null ? null : new ProductModelDto
+                    {
+                        ProductModelId = p.ProductModel.ProductModelId,
+                        Name = p.ProductModel.Name
+                    },
+
+                    Description = null // ⭐ viene aggiunta dopo
+                })
+                .ToListAsync();
+
+            // 3️⃣ Assegniamo la descrizione ai prodotti IN MEMORIA (zero query)
+            foreach (var product in products)
+            {
+                if (product.ProductModelId != null &&
+                    modelDescriptions.TryGetValue(product.ProductModelId.Value, out var desc))
+                {
+                    product.Description = desc;
+                }
+            }
+
+            // 4️⃣ Categorie
+            var categories = await _context.ProductCategories
+                .OrderBy(c => c.Name)
+                .Select(c => new ProductCategoryDto
+                {
+                    ProductCategoryId = c.ProductCategoryId,
+                    Name = c.Name,
+                    ParentProductCategoryId = c.ParentProductCategoryId
+                })
+                .ToListAsync();
+
+            // 5️⃣ Modelli
+            var models = await _context.ProductModels
+                .OrderBy(m => m.Name)
+                .Select(m => new ProductModelDto
+                {
+                    ProductModelId = m.ProductModelId,
+                    Name = m.Name
+                })
+                .ToListAsync();
+
+            // 6️⃣ Descrizioni (opzionale, se vuoi mostrarle tutte)
+            var descriptions = await _context.ProductDescriptions
+                .Select(d => new ProductDescriptionDto
+                {
+                    ProductDescriptionId = d.ProductDescriptionId,
+                    Description = d.Description
+                })
+                .ToListAsync();
+
+            // 7️⃣ Costruzione del catalogo
+            var catalog = new ProductCatalogDto
+            {
+                Products = products,
+                Categories = categories,
+                Models = models,
+                Descriptions = descriptions
+            };
+
+            return ApiResponse<ProductCatalogDto>.Success(catalog, "Catalog loaded");
+        }
     }
 }

@@ -11,5 +11,6 @@ namespace backend.Services.Interfaces
         Task<ApiResponse<ProductDto>> CreateProductAsync(ProductCreateDto dto);
         Task<ApiResponse<ProductDto>> UpdateProductAsync(int id, ProductUpdateDto dto);
         Task<ApiResponse<string>> DeleteProductAsync(int id);
+        Task<ApiResponse<ProductCatalogDto>> GetCatalogAsync();
     }
 }
