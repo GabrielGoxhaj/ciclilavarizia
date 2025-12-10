@@ -108,7 +108,7 @@ namespace backend.Services
                 TaxAmt = order.TaxAmt,
                 Freight = order.Freight,
                 TotalDue = order.TotalDue,
-                Items = order.SalesOrderDetails.Select(d => new OrderDetailDto
+                OrdersDatails = order.SalesOrderDetails.Select(d => new OrderDetailDto
                 {
                     ProductId = d.ProductId,
                     ProductName = d.Product.Name,
@@ -137,7 +137,7 @@ namespace backend.Services
                 TaxAmt = o.TaxAmt,
                 Freight = o.Freight,
                 TotalDue = o.TotalDue,
-                Items = o.SalesOrderDetails.Select(d => new OrderDetailDto
+                OrdersDatails = o.SalesOrderDetails.Select(d => new OrderDetailDto
                 {
                     ProductId = d.ProductId,
                     ProductName = d.Product.Name,

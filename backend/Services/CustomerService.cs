@@ -1,4 +1,5 @@
 ﻿using backend.Data;
+using backend.DTOs.Address;
 using backend.DTOs.Customers;
 using backend.DTOs.Orders;
 using backend.DTOs.Response;
@@ -33,7 +34,34 @@ namespace backend.Services
                     CustomerId = c.CustomerId,
                     FullName = $"{c.FirstName} {c.LastName}",
                     Email = c.EmailAddress,
-                    Phone = c.Phone
+                    Phone = c.Phone,
+                    Addresses = c.CustomerAddresses.Select(a => new AddressDto
+                    {
+                        AddressId = a.Address.AddressId,
+                        AddressLine1 = a.Address.AddressLine1,
+                        City = a.Address.City,
+                        StateProvince = a.Address.StateProvince,
+                        PostalCode = a.Address.PostalCode,
+                        CountryRegion = a.Address.CountryRegion
+                    }).ToList(),
+                    Orders = c.SalesOrderHeaders.Select(o => new OrderDto
+                    {
+                        SalesOrderId = o.SalesOrderId,
+                        OrderDate = o.OrderDate,
+                        SubTotal = o.SubTotal,
+                        TaxAmt = o.TaxAmt,
+                        Freight = o.Freight,
+                        TotalDue = o.TotalDue,
+
+                        OrdersDatails = o.SalesOrderDetails.Select(od => new OrderDetailDto
+                        {
+                            ProductId = od.ProductId,
+                            ProductName = od.Product.Name,
+                            Quantity = od.OrderQty,
+                            UnitPrice = od.UnitPrice,
+                            LineTotal = od.LineTotal
+                        }).ToList()
+                    }).ToList(),
                 })
                 .ToListAsync();
 
