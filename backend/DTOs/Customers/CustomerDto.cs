@@ -10,6 +10,6 @@ namespace backend.DTOs.Customers
         public string? Email { get; set; }
         public string? Phone { get; set; }
         public List<AddressDto> Addresses { get; set; } = new();
-        public List<OrderDto> Orders { get; set; } = new();
+        public List<OrderDto>? Orders { get; set; } = new();
     }
 }

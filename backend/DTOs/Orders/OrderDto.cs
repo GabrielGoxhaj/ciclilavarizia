@@ -9,7 +9,7 @@
         public decimal TaxAmt { get; set; }
         public decimal Freight { get; set; }
         public decimal TotalDue { get; set; }
-        public List<OrderDetailDto> OrdersDatails { get; set; } = new();
+        public List<OrderDetailDto> OrderDetails { get; set; } = new();
     }
 
     public class OrderDetailDto

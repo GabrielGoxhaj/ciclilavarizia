@@ -22,48 +22,32 @@ namespace backend.Services
         public async Task<ApiResponse<List<CustomerDto>>> GetAllCustomersAsync(int page, int pageSize)
         {
             var totalItems = await _context.Customers.CountAsync();
-
             var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
 
             var customers = await _context.Customers
-                .OrderBy(c => c.CustomerId)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(c => new CustomerDto
-                {
-                    CustomerId = c.CustomerId,
-                    FullName = $"{c.FirstName} {c.LastName}",
-                    Email = c.EmailAddress,
-                    Phone = c.Phone,
-                    Addresses = c.CustomerAddresses.Select(a => new AddressDto
-                    {
-                        AddressId = a.Address.AddressId,
-                        AddressLine1 = a.Address.AddressLine1,
-                        City = a.Address.City,
-                        StateProvince = a.Address.StateProvince,
-                        PostalCode = a.Address.PostalCode,
-                        CountryRegion = a.Address.CountryRegion
-                    }).ToList(),
-                    Orders = c.SalesOrderHeaders.Select(o => new OrderDto
-                    {
-                        SalesOrderId = o.SalesOrderId,
-                        OrderDate = o.OrderDate,
-                        SubTotal = o.SubTotal,
-                        TaxAmt = o.TaxAmt,
-                        Freight = o.Freight,
-                        TotalDue = o.TotalDue,
+                   .Include(c => c.CustomerAddresses)
+                      .ThenInclude(ca => ca.Address)
+                   .OrderBy(c => c.CustomerId)
+                   .Skip((page - 1) * pageSize)
+                   .Take(pageSize)
+                   .Select(c => new CustomerDto
+                   {
+                       CustomerId = c.CustomerId,
+                       FullName = $"{c.FirstName} {c.LastName}",
+                       Email = c.EmailAddress,
+                       Phone = c.Phone,
 
-                        OrdersDatails = o.SalesOrderDetails.Select(od => new OrderDetailDto
-                        {
-                            ProductId = od.ProductId,
-                            ProductName = od.Product.Name,
-                            Quantity = od.OrderQty,
-                            UnitPrice = od.UnitPrice,
-                            LineTotal = od.LineTotal
-                        }).ToList()
-                    }).ToList(),
-                })
-                .ToListAsync();
+                       Addresses = c.CustomerAddresses.Select(a => new AddressDto
+                       {
+                           AddressId = a.Address.AddressId,
+                           AddressLine1 = a.Address.AddressLine1,
+                           City = a.Address.City,
+                           StateProvince = a.Address.StateProvince,
+                           PostalCode = a.Address.PostalCode,
+                           CountryRegion = a.Address.CountryRegion
+                       }).ToList()
+                   })
+                   .ToListAsync();
 
             var pagination = new PaginationDto
             {
@@ -78,7 +62,13 @@ namespace backend.Services
 
         public async Task<ApiResponse<CustomerDto>> GetCustomerByIdAsync(int id)
         {
-            var customer = await _context.Customers.FindAsync(id);
+            var customer = await _context.Customers
+                  .Include(c => c.CustomerAddresses)
+                     .ThenInclude(ca => ca.Address)
+                  .Include(c => c.SalesOrderHeaders)
+                     .ThenInclude(oh => oh.SalesOrderDetails)
+                        .ThenInclude(od => od.Product)
+                 .FirstOrDefaultAsync(c => c.CustomerId == id);
 
             if (customer == null)
                 return ApiResponse<CustomerDto>.Fail("Customer not found");
@@ -88,7 +78,38 @@ namespace backend.Services
                 CustomerId = customer.CustomerId,
                 FullName = $"{customer.FirstName} {customer.LastName}",
                 Email = customer.EmailAddress,
-                Phone = customer.Phone
+                Phone = customer.Phone,
+
+                Addresses = customer.CustomerAddresses.Select(a => new AddressDto
+                {
+                    AddressId = a.Address.AddressId,
+                    AddressLine1 = a.Address.AddressLine1,
+                    AddressLine2 = a.Address.AddressLine2,
+                    City = a.Address.City,
+                    StateProvince = a.Address.StateProvince,
+                    PostalCode = a.Address.PostalCode,
+                    CountryRegion = a.Address.CountryRegion
+                }).ToList(),
+
+                Orders = customer.SalesOrderHeaders.Select(o => new OrderDto
+                {
+                    SalesOrderId = o.SalesOrderId,
+                    OrderDate = o.OrderDate,
+                    SubTotal = o.SubTotal,
+                    TaxAmt = o.TaxAmt,
+                    Freight = o.Freight,
+                    TotalDue = o.TotalDue,
+
+                    OrderDetails = o.SalesOrderDetails.Select(od => new OrderDetailDto
+                    {
+                        ProductId = od.ProductId,
+                        ProductName = od.Product.Name,
+                        Quantity = od.OrderQty,
+                        UnitPrice = od.UnitPrice,
+                        LineTotal = od.LineTotal
+                    }).ToList()
+
+                }).ToList()
             };
 
             return ApiResponse<CustomerDto>.Success(dto, "Customer retrieved");
