@@ -353,10 +353,13 @@ namespace backend.Services
             {
                 var searchLower = search.ToLower();
                 query = query.Where(p =>
-                   p.Name.ToLower().Contains(searchLower) ||
-                   p.ProductNumber.ToLower().Contains(searchLower) ||
-                   (p.ProductModel != null && p.ProductModel.Name.ToLower().Contains(searchLower))
-                );
+                    p.Name.ToLower().Contains(searchLower) ||
+                    p.ProductNumber.ToLower().Contains(searchLower) ||
+                    (p.ProductModel != null && p.ProductModel.Name.ToLower().Contains(searchLower)) ||
+                    (p.ProductModel != null && p.ProductModel
+                         .ProductModelProductDescriptions
+                         .Any(d => d.ProductDescription.Description.ToLower().Contains(searchLower)))
+    );
             }
 
             if (categoryId.HasValue)
