@@ -12,5 +12,14 @@ namespace backend.Services.Interfaces
         Task<ApiResponse<ProductDto>> UpdateProductAsync(int id, ProductUpdateDto dto);
         Task<ApiResponse<string>> DeleteProductAsync(int id);
         Task<ApiResponse<ProductCatalogDto>> GetCatalogAsync();
+        Task<ApiResponse<List<ProductDto>>> GetFilteredProductsAsync(string? search,
+             int? categoryId,
+             decimal? minPrice,
+             decimal? maxPrice,
+             string? color,
+             string? size,
+             string? sort,
+             int page,
+             int pageSize);
     }
 }

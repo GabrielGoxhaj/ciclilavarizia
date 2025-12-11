@@ -108,5 +108,21 @@ namespace backend.Controllers
             return Ok(respone);
         }
 
+        [HttpGet("search")]
+        public async Task<ActionResult<ApiResponse<List<ProductDto>>>> GetFilteredProducts(
+            string? search,
+            int? categoryId,
+            decimal? minPrice,
+            decimal? maxPrice,
+            string? color,
+            string? size,
+            string? sort,
+            int page = 1,
+            int pageSize = 20)
+        {
+            var response = await _service.GetFilteredProductsAsync(search, categoryId, minPrice, maxPrice, color, size, sort, page, pageSize);
+            return Ok(response);
+        }
+
     }
 }

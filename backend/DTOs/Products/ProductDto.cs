@@ -9,6 +9,8 @@
         public decimal ListPrice { get; set; }
         public string? Size { get; set; }
         public decimal? Weight { get; set; }
+        public string? ThumbnailBase64 { get; set; }
+        public string? ThumbnailFileName { get; set; }
         public int? ProductCategoryId { get; set; }
         public ProductCategoryDto? Category { get; set; }
         public int? ProductModelId { get; set; }

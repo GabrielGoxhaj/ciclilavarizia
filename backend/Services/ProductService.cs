@@ -131,7 +131,12 @@ namespace backend.Services
                         ProductDescriptionId = d.ProductDescription.ProductDescriptionId,
                         Description = d.ProductDescription.Description
                     })
-                    .FirstOrDefault()
+                    .FirstOrDefault(),
+                ThumbnailBase64 = product.ThumbNailPhoto != null
+                    ? Convert.ToBase64String(product.ThumbNailPhoto)
+                    : null,
+
+                ThumbnailFileName = product.ThumbnailPhotoFileName
             };
             return ApiResponse<ProductDto>.Success(dto, "Product retrieved");
         }
@@ -220,6 +225,7 @@ namespace backend.Services
 
             return ApiResponse<string>.Success("Product deleted");
         }
+
 
         public async Task<ApiResponse<ProductCatalogDto>> GetCatalogAsync()
         {
@@ -322,6 +328,136 @@ namespace backend.Services
             };
 
             return ApiResponse<ProductCatalogDto>.Success(catalog, "Catalog loaded");
+        }
+
+        public async Task<ApiResponse<List<ProductDto>>> GetFilteredProductsAsync(
+            string? search,
+            int? categoryId,
+            decimal? minPrice,
+            decimal? maxPrice,
+            string? color,
+            string? size,
+            string? sort,
+            int page,
+            int pageSize)
+        {
+            var query = _context.Products
+                .Include(p => p.ProductCategory)
+                .Include(p => p.ProductModel)
+                   .ThenInclude(pm => pm.ProductModelProductDescriptions)
+                      .ThenInclude(pmpd => pmpd.ProductDescription)
+                .AsQueryable();
+
+            // Filtri
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var searchLower = search.ToLower();
+                query = query.Where(p =>
+                   p.Name.ToLower().Contains(searchLower) ||
+                   p.ProductNumber.ToLower().Contains(searchLower) ||
+                   (p.ProductModel != null && p.ProductModel.Name.ToLower().Contains(searchLower))
+                );
+            }
+
+            if (categoryId.HasValue)
+                query = query.Where(p => p.ProductCategoryId == categoryId.Value);
+
+            if (minPrice.HasValue)
+                query = query.Where(p => p.ListPrice >= minPrice.Value);
+
+            if (maxPrice.HasValue)
+                query = query.Where(p => p.ListPrice <= maxPrice.Value);
+
+            if (!string.IsNullOrWhiteSpace(color))
+            {
+                var lowerColor = color.ToLower();
+                query = query.Where(p =>
+                    p.Color != null &&
+                    p.Color.ToLower() == lowerColor
+                );
+            }
+
+            if (!string.IsNullOrWhiteSpace(size))
+            {
+                var sizeLower = size.ToLower();
+                query = query.Where(p =>
+                    p.Size != null &&
+                    p.Size.ToLower() == sizeLower
+                );
+            }
+
+            // Sorting dinamico
+            query = sort switch
+            {
+                "price_asc" => query.OrderBy(p => p.ListPrice),
+                "price_desc" => query.OrderByDescending(p => p.ListPrice),
+                "name_desc" => query.OrderByDescending(p => p.Name),
+                "name_asc" => query.OrderBy(p => p.Name),
+                _ => query.OrderBy(p => p.ProductId) // default
+            };
+
+            // Paginazione
+            var totalItems = await query.CountAsync();
+            var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+            var result = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            // Mapping finale in ProductDto
+            var products = result.Select(p => new ProductDto
+            {
+                ProductId = p.ProductId,
+                Name = p.Name,
+                ProductNumber = p.ProductNumber,
+                Color = p.Color,
+                ListPrice = p.ListPrice,
+                Size = p.Size,
+                Weight = p.Weight,
+
+                ProductCategoryId = p.ProductCategoryId,
+                Category = p.ProductCategory == null ? null : new ProductCategoryDto
+                {
+                    ProductCategoryId = p.ProductCategory.ProductCategoryId,
+                    Name = p.ProductCategory.Name,
+                    ParentProductCategoryId = p.ProductCategory.ParentProductCategoryId
+                },
+
+                ProductModelId = p.ProductModelId,
+                Model = p.ProductModel == null ? null : new ProductModelDto
+                {
+                    ProductModelId = p.ProductModel.ProductModelId,
+                    Name = p.ProductModel.Name
+                },
+
+                Description = p.ProductModel?
+                    .ProductModelProductDescriptions?
+                    .Select(d => new ProductDescriptionDto
+                    {
+                        ProductDescriptionId = d.ProductDescription.ProductDescriptionId,
+                        Description = d.ProductDescription.Description
+                    })
+                    .FirstOrDefault(),
+
+                ThumbnailBase64 = p.ThumbNailPhoto != null
+                    ? Convert.ToBase64String(p.ThumbNailPhoto)
+                    : null,
+
+                ThumbnailFileName = p.ThumbnailPhotoFileName
+            })
+            .ToList();
+
+            // Restituzione con paginazione
+            var pagination = new PaginationDto
+            {
+                Page = page,
+                PageSize = pageSize,
+                TotalItems = totalItems,
+                TotalPages = totalPages
+            };
+
+            return ApiResponse<List<ProductDto>>.Success(products, "Filtered products retrieved", pagination);
         }
     }
 }
