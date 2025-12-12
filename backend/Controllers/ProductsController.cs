@@ -2,6 +2,7 @@
 using backend.DTOs.Response;
 using backend.Services;
 using backend.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -43,6 +44,7 @@ namespace backend.Controllers
         }
 
         // POST: api/Products
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult<ApiResponse<ProductCreateDto>>> PostProduct(ProductCreateDto dto)
         {
@@ -62,6 +64,7 @@ namespace backend.Controllers
         }
 
         // PUT: api/Products/5
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<ActionResult<ApiResponse<ProductDto>>> PutProduct(int id, ProductUpdateDto dto)
         {
@@ -83,6 +86,7 @@ namespace backend.Controllers
         }
 
         // DELETE: api/Products/5
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<ActionResult<ApiResponse<string>>> DeleteProduct(int id)
         {
