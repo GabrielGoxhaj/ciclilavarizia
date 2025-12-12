@@ -1,3 +1,4 @@
+using AuthLibrary.Security;
 using backend.Data;
 using backend.Services;
 using backend.Services.Interfaces;
@@ -26,25 +27,15 @@ namespace backend
                 options.UseSqlServer(builder.Configuration.GetConnectionString("AuthConnection")));
 
 
-            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
-                {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(
-                            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
-
-                        ValidateIssuer = true,
-                        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-
-                        ValidateAudience = true,
-                        ValidAudience = builder.Configuration["Jwt:Audience"],
-
-                        ValidateLifetime = true,
-                        ClockSkew = TimeSpan.Zero
-                    };
-                });
+            builder.Services.AddScoped<JwtTokenGenerator>(sp =>
+            {
+                var config = sp.GetRequiredService<IConfiguration>();
+                return new JwtTokenGenerator(
+                    config["Jwt:Key"]!,
+                    config["Jwt:Issuer"]!,
+                    config["Jwt:Audience"]!
+                );
+            });
 
             // Registrazione dei servizi personalizzati
             builder.Services.AddScoped<IAuthService, AuthService>();

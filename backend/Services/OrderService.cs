@@ -87,7 +87,7 @@ namespace backend.Services
             await _context.SaveChangesAsync();
 
             // Restituzione ordine completo
-            return await GetOrderByIdAsync(orderHeader.SalesOrderId)
+            return await GetMyOrderByIdAsync(userId, orderHeader.SalesOrderId)
                     ?? throw new Exception("Errore nel recupero dell'ordine creato.");
 
         }

@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36616.10 d17.14
+# Visual Studio Version 18
+VisualStudioVersion = 18.1.11304.174 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "backend", "backend.csproj", "{2A2B4B94-9A90-421A-89E4-72E26BEB8FF4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthLibrary", "..\AuthLibrary\AuthLibrary.csproj", "{72D3F03D-6042-45CF-B047-AC1B6E2B8668}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{2A2B4B94-9A90-421A-89E4-72E26BEB8FF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2A2B4B94-9A90-421A-89E4-72E26BEB8FF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2A2B4B94-9A90-421A-89E4-72E26BEB8FF4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{72D3F03D-6042-45CF-B047-AC1B6E2B8668}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{72D3F03D-6042-45CF-B047-AC1B6E2B8668}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{72D3F03D-6042-45CF-B047-AC1B6E2B8668}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{72D3F03D-6042-45CF-B047-AC1B6E2B8668}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
