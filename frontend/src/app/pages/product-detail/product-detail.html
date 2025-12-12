@@ -1,0 +1,20 @@
+<div class="container">
+  <div *ngIf="product" class="product-detail">
+    <button routerLink="/products" style="margin-bottom: 1rem">← Torna ai prodotti</button>
+    <h2>{{ product.name }}</h2>
+    <img
+      [src]="product.image || 'https://via.placeholder.com/300x200'"
+      alt="{{ product.name }}"
+      width="300"
+      height="200"
+    />
+    <div><b>Categoria:</b> {{ product.category }}</div>
+    <div><b>Prezzo:</b> ${{ product.price }}</div>
+    <div><b>Disponibilità:</b> {{ product.stock }}</div>
+    <p>{{ product.description }}</p>
+  </div>
+  <div *ngIf="!product" class="product-detail">
+    <p>Prodotto non trovato.</p>
+    <button routerLink="/products">Torna ai prodotti</button>
+  </div>
+</div>

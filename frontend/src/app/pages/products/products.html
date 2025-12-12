@@ -1,0 +1,22 @@
+<div class="container">
+  <div class="products-list">
+    <h2>Prodotti disponibili</h2>
+    <div *ngFor="let product of products" class="product-card">
+      <div class="product-img">
+        <img
+          [src]="product.image || 'https://via.placeholder.com/200x150'"
+          alt="{{ product.name }}"
+          width="200"
+          height="150"
+        />
+      </div>
+      <div class="product-info">
+        <h3>{{ product.name }}</h3>
+        <p>{{ product.description }}</p>
+        <div><b>Categoria:</b> {{ product.category }}</div>
+        <div><b>Prezzo:</b> ${{ product.price }}</div>
+        <button [routerLink]="['/products', product.id]">Dettaglio</button>
+      </div>
+    </div>
+  </div>
+</div>
