@@ -1,6 +1,8 @@
 ﻿using backend.DTOs.Orders;
 using backend.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace backend.Controllers
 {
@@ -8,49 +10,73 @@ namespace backend.Controllers
     [Route("api/[controller]")]
     public class OrdersController : ControllerBase
     {
-        
-        private readonly IOrderService _orderService;
 
-        public OrdersController(IOrderService orderService)
+        private readonly IOrderCommandService _commandService;
+        private readonly IOrderQueryService _queryService;
+
+        public OrdersController(
+            IOrderCommandService commandService,
+            IOrderQueryService queryService)
         {
-            _orderService = orderService;
+            _commandService = commandService;
+            _queryService = queryService;
         }
 
+        // CREATE ORDER (USER)
+        [Authorize]
         [HttpPost]
-        public async Task<IActionResult> CreateOrder(CreateOrderDto dto)
+        public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDto dto)
         {
-            try
-            {
-               var created = await _orderService.CreateOrderAsync(dto);
-               return Ok(created);
-            }
-            catch (Exception ex)
-            {
-               return StatusCode(500, new { message = ex.Message});
-            }
+            var userId = GetUserId();
+            var order = await _commandService.CreateOrderAsync(dto, userId);
+            return Ok(order);
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetOrder(int id)
+        // GET MY ORDERS (USER)
+        [Authorize]
+        [HttpGet("my")]
+        public async Task<IActionResult> GetMyOrders()
         {
-            if (id <= 0)
-            {
-                return BadRequest(new { message = "Invalid order ID" });
-            }
-            var order = await _orderService.GetOrderByIdAsync(id);
-            return order == null ? NotFound() : Ok(order);
+            var userId = GetUserId();
+            var orders = await _queryService.GetMyOrdersAsync(userId);
+            return Ok(orders);
         }
 
+        // GET MY ORDER BY ID (USER)
+        [Authorize]
+        [HttpGet("my/{orderId}")]
+        public async Task<IActionResult> GetMyOrderById(int orderId)
+        {
+            var userId = GetUserId();
+            var order = await _queryService.GetMyOrderByIdAsync(userId, orderId);
+
+            if (order == null)
+                return NotFound("Order not found");
+
+            return Ok(order);
+        }
+
+        // ADMIN: GET ALL ORDERS
+        [Authorize(Roles = "Admin")]
+        [HttpGet]
+        public async Task<IActionResult> GetAllOrders()
+        {
+            var orders = await _queryService.GetAllOrdersAsync();
+            return Ok(orders);
+        }
+
+        // ADMIN: GET ORDERS BY CUSTOMER
+        [Authorize(Roles = "Admin")]
         [HttpGet("customer/{customerId}")]
         public async Task<IActionResult> GetOrdersByCustomer(int customerId)
         {
-            if (customerId <= 0)
-            {
-                return BadRequest(new { message = "Invalid customer ID" });
-            }
-
-            var orders = await _orderService.GetOrdersByCustomerIdAsync(customerId);
+            var orders = await _queryService.GetOrdersByCustomerIdAsync(customerId);
             return Ok(orders);
+        }
+
+        private int GetUserId()
+        {
+            return int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         }
     }
 }

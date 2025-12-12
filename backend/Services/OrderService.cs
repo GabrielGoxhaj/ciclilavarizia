@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace backend.Services
 {
-    public class OrderService : IOrderService
+    public class OrderService : IOrderCommandService, IOrderQueryService
     {
         private readonly AdventureWorksLt2019Context _context;
 
@@ -15,7 +15,7 @@ namespace backend.Services
             _context = context;
         }
 
-        public async Task<OrderDto> CreateOrderAsync(CreateOrderDto dto)
+        public async Task<OrderDto> CreateOrderAsync(CreateOrderDto dto, int userId)
         {
             // Validazione DTO
             if (dto == null)
@@ -26,7 +26,7 @@ namespace backend.Services
 
             // Validazione cliente esistente
             var customerExists = await _context.Customers.AnyAsync(c => c.CustomerId == dto.CustomerId);
-            if(!customerExists)
+            if (!customerExists)
                 throw new Exception("Customer not found.");
 
             // Verifica che tutti i prodotti esistano
@@ -45,6 +45,7 @@ namespace backend.Services
             var orderHeader = new SalesOrderHeader
             {
                 CustomerId = dto.CustomerId,
+                UserId = userId,
                 OrderDate = DateTime.UtcNow,
                 Status = 1,
                 ShipMethod = "DEFAULT",
@@ -90,15 +91,54 @@ namespace backend.Services
                     ?? throw new Exception("Errore nel recupero dell'ordine creato.");
 
         }
-        public async Task<OrderDto?> GetOrderByIdAsync(int orderId)
+
+        // USER METHODS
+        public async Task<List<OrderDto>> GetMyOrdersAsync(int userId)
+        {
+            var orders = await _context.SalesOrderHeaders
+                .Include(o => o.SalesOrderDetails)
+                    .ThenInclude(d => d.Product)
+                .Where(o => o.UserId == userId)
+                .OrderByDescending(o => o.OrderDate)
+                .ToListAsync();
+
+            return orders.Select(MapToDto).ToList();
+        }
+        public async Task<OrderDto> GetMyOrderByIdAsync(int userId, int orderId)
         {
             var order = await _context.SalesOrderHeaders
                 .Include(o => o.SalesOrderDetails)
-                .ThenInclude(d => d.Product)
-                .FirstOrDefaultAsync(o => o.SalesOrderId == orderId);
+                    .ThenInclude(d => d.Product)
+                .FirstOrDefaultAsync(o =>
+                    o.SalesOrderId == orderId &&
+                    o.UserId == userId);
 
-            if (order == null) return null;
+            return order != null ? MapToDto(order) : null;
+        }
 
+        // ADMIN METHODS
+        public async Task<List<OrderDto>> GetAllOrdersAsync()
+        {
+            var orders = await _context.SalesOrderHeaders
+                .Include(o => o.SalesOrderDetails)
+                    .ThenInclude(d => d.Product)
+                .OrderByDescending(o => o.OrderDate)
+                .ToListAsync();
+            return orders.Select(MapToDto).ToList();
+        }
+        public async Task<List<OrderDto>> GetOrdersByCustomerIdAsync(int customerId)
+        {
+            var orders = await _context.SalesOrderHeaders
+                .Include(o => o.SalesOrderDetails)
+                    .ThenInclude(d => d.Product)
+                .Where(o => o.CustomerId == customerId)
+                .OrderByDescending(o => o.OrderDate)
+                .ToListAsync();
+
+            return orders.Select(MapToDto).ToList();
+        }
+        private static OrderDto MapToDto(SalesOrderHeader order)
+        {
             return new OrderDto
             {
                 SalesOrderId = order.SalesOrderId,
@@ -118,36 +158,6 @@ namespace backend.Services
                     LineTotal = d.LineTotal
                 }).ToList()
             };
-
-        }
-        public async Task<List<OrderDto>> GetOrdersByCustomerIdAsync(int customerId)
-        {
-            var orders = await _context.SalesOrderHeaders
-                .Include(o => o.SalesOrderDetails)
-                .ThenInclude(d => d.Product)
-                .Where(o => o.CustomerId == customerId)
-                .ToListAsync();
-
-            return orders.Select(o => new OrderDto
-            {
-                SalesOrderId = o.SalesOrderId,
-                CustomerId = o.CustomerId,
-                OrderDate = o.OrderDate,
-                SubTotal = o.SubTotal,
-                TaxAmt = o.TaxAmt,
-                Freight = o.Freight,
-                TotalDue = o.TotalDue,
-                OrderDetails = o.SalesOrderDetails.Select(d => new OrderDetailDto
-                {
-                    ProductId = d.ProductId,
-                    ProductName = d.Product.Name,
-                    Quantity = d.OrderQty,
-                    UnitPrice = d.UnitPrice,
-                    Discount = d.UnitPriceDiscount,
-                    LineTotal = d.LineTotal
-                }).ToList()
-
-            }).ToList();
         }
     }
 }
