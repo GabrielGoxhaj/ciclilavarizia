@@ -13,12 +13,14 @@ namespace backend.Controllers
         {
             _authService = authService;
         }
+
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] UserRegisterDto dto)
         {
             var response = await _authService.Register(dto);
             return Ok(response);
         }
+
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] UserLoginDto dto)
         {

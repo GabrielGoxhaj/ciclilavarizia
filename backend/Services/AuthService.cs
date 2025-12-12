@@ -2,6 +2,7 @@
 using backend.DTOs.Auth;
 using backend.DTOs.Response;
 using backend.Models;
+using backend.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
@@ -12,7 +13,7 @@ using System.Text;
 
 namespace backend.Services
 {
-    public class AuthService
+    public class AuthService : IAuthService
     {
         private readonly AuthDbContext _context;
         private readonly IConfiguration _config;
@@ -71,7 +72,12 @@ namespace backend.Services
             var token = CreateToken(user);
 
             return ApiResponse<AuthResponseDto>.Success(
-                new AuthResponseDto { Token = token, Username = user.Username },
+                new AuthResponseDto 
+                { 
+                    Token = token, 
+                    Username = user.Username,
+                    Role = user.Role
+                },
                 "Login successful"
             );
         }
