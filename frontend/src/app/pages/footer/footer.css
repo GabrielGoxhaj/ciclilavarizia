@@ -1,0 +1,226 @@
+.footer {
+  background-color: #1a1a1a;
+  color: #e0e0e0;
+  /* Ridotto padding verticale per un footer molto più compatto e padding laterale ridotto */
+  padding: 1rem 0.5rem 0.75rem;
+  margin-top: auto;
+  box-shadow: 6px 0 12px rgba(22, 21, 21, 0.5);
+}
+
+.footer-container {
+  /* Aumenta max-width per occupare più spazio orizzontale e ridurre i margini laterali */
+  max-width: 1600px;
+  margin: 0 auto;
+  display: flex;
+  /* Layout asimmetrico: 1/5 per brand, 4/5 per contenuti */
+  gap: 0.5rem; /* gap piccolo tra le due sezioni principali */
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+  /* padding asimmetrico: sinistra 0.5rem, destra 1rem (il doppio) */
+  padding-left: 0.5rem;
+  padding-right: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* Sezione Brand (1/5 della larghezza) */
+.footer-brand-section {
+  flex: 0 0 40%; /* occupa 1/5 della larghezza */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Sezione Contenuti (4/5 della larghezza) */
+.footer-content-section {
+  flex: 0 0 60%; /* occupa 4/5 della larghezza */
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 colonne per categorie, supporto, azienda, legale */
+  gap: 0.5rem; /* gap molto piccolo tra le colonne di contenuto */
+  padding-left: 5rem; /* margine sinistro */
+  padding-right: 5rem; /* margine destro */
+}
+
+/* Footer Column */
+.footer-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: white;
+  font-weight: 700;
+  font-size: 1.25rem;
+  margin-bottom: 0.25rem; /* meno spazio sotto il logo */
+}
+
+.footer-logo svg {
+  width: 24px;
+  height: 24px;
+  stroke: #c41e3a;
+}
+
+.footer-description {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  margin-bottom: 0.5rem; /* ridotto */
+  color: #b0b0b0;
+}
+
+/* Social Links */
+.social-links {
+  display: flex;
+  gap: 1rem;
+}
+
+.social-links a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px; /* più piccoli per ridurre altezza complessiva */
+  height: 28px;
+  background-color: rgba(196, 30, 58, 0.15);
+  border-radius: 50%;
+  color: #c41e3a;
+  transition: all 0.3s ease;
+}
+
+.social-links a:hover {
+  background-color: #c41e3a;
+  color: white;
+  transform: translateY(-4px);
+}
+
+.social-links svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Footer Title */
+.footer-title {
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+  letter-spacing: 0.02em;
+}
+
+/* Footer Links */
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; /* distanza ridotta tra i link per colonne più compatte */
+}
+
+.footer-links a {
+  color: #b0b0b0;
+  text-decoration: none;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+  display: inline-block;
+}
+
+.footer-links a:hover {
+  color: #c41e3a;
+  transform: translateX(4px);
+}
+
+/* Footer Bottom */
+.footer-bottom {
+  max-width: 1600px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem; /* meno spazio tra elementi */
+  padding-top: 0.5rem; /* diminuisce l'altezza inferiore */
+  padding-left: 0.5rem;
+  padding-right: 1rem;
+  font-size: 0.78rem;
+  color: #808080;
+}
+
+.footer-bottom p {
+  margin: 0;
+}
+
+.payment-methods {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.payment-methods svg {
+  border-radius: 4px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .footer {
+    /* padding laterale ridotto anche su tablet/mobile */
+    padding: 1.25rem 0.75rem 0.75rem;
+  }
+
+  .footer-container {
+    flex-direction: column;
+    padding-left: 0.5rem;
+    padding-right: 0.75rem;
+    gap: 1rem;
+  }
+
+  .footer-brand-section {
+    flex: 0 0 100%;
+  }
+
+  .footer-content-section {
+    flex: 0 0 100%;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+    padding-left: 0.5rem;
+    padding-right: 0.75rem;
+  }
+
+  .payment-methods {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-content-section {
+    grid-template-columns: 1fr;
+  }
+
+  .footer {
+    padding: 1rem 0.75rem 0.75rem;
+  }
+
+  .footer-bottom {
+    font-size: 0.75rem;
+  }
+
+  .social-links {
+    gap: 0.75rem;
+  }
+
+  .social-links a {
+    width: 36px;
+    height: 36px;
+  }
+
+  .social-links svg {
+    width: 16px;
+    height: 16px;
+  }
+}

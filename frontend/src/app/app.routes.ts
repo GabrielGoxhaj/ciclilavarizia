@@ -15,5 +15,13 @@ export const routes: Routes = [
     path: 'login',
     loadComponent: () => import('./pages/auth/auth').then((m) => m.AuthComponent),
   },
+  {
+    path: 'about',
+    loadComponent: () => import('./pages/about/about').then((m) => m.AboutComponent),
+  },
+  {
+    path: 'contact',
+    loadComponent: () => import('./pages/contact/contact').then((m) => m.ContactComponent),
+  },
   { path: '**', redirectTo: '/products' },
 ];
