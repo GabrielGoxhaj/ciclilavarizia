@@ -3,6 +3,7 @@ using backend.DTOs.Customers;
 using backend.DTOs.Response;
 using backend.Models;
 using backend.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,6 +21,7 @@ namespace backend.Controllers
         }
 
         // GET: api/Customers
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> GetCustomers(int page = 1, int pageSize = 20)
         {
@@ -29,6 +31,7 @@ namespace backend.Controllers
         }
 
         // GET: api/Customers/5
+        [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetCustomer(int id)
         {
@@ -43,6 +46,7 @@ namespace backend.Controllers
         }
 
         // POST: api/Customers
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult<ApiResponse<CustomerDto>>> PostCustomer(CustomerCreateDto dto)
         {
@@ -69,6 +73,7 @@ namespace backend.Controllers
         }
 
         // PUT: api/Customers/5
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<ActionResult> PutCustomer(int id, CustomerUpdateDto dto)
         {
@@ -84,6 +89,7 @@ namespace backend.Controllers
         }
 
         // DELETE: api/Customers/5
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCustomer(int id)
         {

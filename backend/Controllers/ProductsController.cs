@@ -20,6 +20,7 @@ namespace backend.Controllers
         }
 
         // GET: api/Products
+        [AllowAnonymous]
         [HttpGet]
         public async Task<ActionResult> GetAllProducts(int page = 1, int size = 20)
         {
@@ -29,6 +30,7 @@ namespace backend.Controllers
         }
 
         // GET: api/Products/5
+        [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<ActionResult> GetProduct(int id)
         {
