@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
 using System.Security.Claims;
 using AuthLibrary.Security;
+using backend.DTOs.Customers;
 
 
 namespace backend.Services
@@ -22,11 +23,34 @@ namespace backend.Services
             _tokenGenerator = tokenGenerator;
         }
 
+        //public async Task<ApiResponse<string>> Register(UserRegisterDto dto)
+        //{
+        //    if (await _context.Users.AnyAsync(u => u.Email == dto.Email))
+        //        return ApiResponse<string>.Fail("Email already in use.");
 
-        public async Task<ApiResponse<string>> Register(UserRegisterDto dto)
+        //    PasswordHasher.CreateHash(dto.Password, out byte[] passwordHash, out byte[] passwordSalt);
+
+        //    var user = new AppUser
+        //    {
+        //        Username = dto.Username,
+        //        Email = dto.Email,
+        //        PasswordHash = passwordHash,
+        //        PasswordSalt = passwordSalt
+        //    };
+
+        //    _context.Users.Add(user);
+        //    await _context.SaveChangesAsync();
+
+        //    return ApiResponse<string>.Success("User registered");
+        //}
+
+        public async Task<int> CreateCredentialsAsync(CustomerRegistrationDto dto) // email e username univoci.
         {
             if (await _context.Users.AnyAsync(u => u.Email == dto.Email))
-                return ApiResponse<string>.Fail("Email already in use.");
+                throw new Exception("Email already exists in Security DB.");
+
+            if (await _context.Users.AnyAsync(u => u.Username == dto.Username))
+                throw new Exception($"Username '{dto.Username}' already exists in Security DB.");
 
             PasswordHasher.CreateHash(dto.Password, out byte[] passwordHash, out byte[] passwordSalt);
 
@@ -35,13 +59,13 @@ namespace backend.Services
                 Username = dto.Username,
                 Email = dto.Email,
                 PasswordHash = passwordHash,
-                PasswordSalt = passwordSalt
+                PasswordSalt = passwordSalt,
             };
 
             _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(); // genera Id/FkUserLogins per collegamento tra i db CicliLavarizia e CicliLavariziaAuth
 
-            return ApiResponse<string>.Success("User registered");
+            return user.Id;
         }
 
         public async Task<ApiResponse<AuthResponseDto>> Login(UserLoginDto dto)

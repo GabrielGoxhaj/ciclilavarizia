@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Transactions;
 
 namespace backend
 {
@@ -13,6 +14,9 @@ namespace backend
     {
         public static void Main(string[] args)
         {
+            // https://github.com/dotnet/runtime/issues/80777
+            TransactionManager.ImplicitDistributedTransactions = true; // vedi link sopra
+
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
@@ -43,6 +47,7 @@ namespace backend
             builder.Services.AddScoped<IProductService, ProductService>();
             builder.Services.AddScoped<IOrderCommandService, OrderService>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
+            builder.Services.AddScoped<IAccountManager, AccountManager>();
             
 
             var app = builder.Build();

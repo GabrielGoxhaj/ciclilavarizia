@@ -154,6 +154,67 @@ namespace backend.Services
             return ApiResponse<CustomerDto>.Success(result, "Customer created successfully");
         }
 
+        public async Task CreateOrUpdateCustomerProfileAsync(CustomerRegistrationDto dto, int securityUserId)
+        {
+            var existingCustomer = await _context.Customers
+                .FirstOrDefaultAsync(c => c.EmailAddress == dto.Email);
+
+            Customer customerToProcess;
+
+            if (existingCustomer != null) // utente 'storico' del db CicliLavarizia
+            {
+                existingCustomer.FkUserLogins = securityUserId; // aggiunge collegamento.
+                existingCustomer.ModifiedDate = DateTime.UtcNow;
+                customerToProcess = existingCustomer;
+            }
+            else // nuovo utente
+            {
+                customerToProcess = new Customer
+                {
+                    FirstName = dto.FirstName,
+                    LastName = dto.LastName,
+                    EmailAddress = dto.Email,
+                    Phone = dto.Phone,
+                    FkUserLogins = securityUserId, 
+                    ModifiedDate = DateTime.UtcNow,
+                    Rowguid = Guid.NewGuid()
+                };
+
+                _context.Customers.Add(customerToProcess);
+            }
+
+            // gestione addresses, se forniti durante la registrazione
+            if (dto.Addresses != null && dto.Addresses.Any()) 
+            {
+                foreach (var addrDto in dto.Addresses)
+                {
+                    var newAddress = new Address
+                    {
+                        AddressLine1 = addrDto.AddressLine1,
+                        City = addrDto.City,
+                        StateProvince = addrDto.StateProvince,
+                        CountryRegion = addrDto.CountryRegion,
+                        PostalCode = addrDto.PostalCode,
+                        ModifiedDate = DateTime.UtcNow,
+                        Rowguid = Guid.NewGuid()
+                    };
+
+                    var customerAddress = new CustomerAddress
+                    {
+                        Customer = customerToProcess,
+                        Address = newAddress,
+                        AddressType = addrDto.AddressType, // "Shipping", hardcoded nel Dto...
+                        ModifiedDate = DateTime.UtcNow,
+                        Rowguid = Guid.NewGuid()
+                    };
+
+                    _context.CustomerAddresses.Add(customerAddress);
+                }
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<ApiResponse<CustomerDto>> UpdateCustomerAsync(int id, CustomerUpdateDto dto)
         {
             var customer = await _context.Customers.FindAsync(id);

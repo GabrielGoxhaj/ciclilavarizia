@@ -13,11 +13,11 @@ namespace backend.Controllers
     [ApiController]
     public class CustomersController : ControllerBase
     {
-        private readonly ICustomerService _service;
+        private readonly ICustomerService _customerService;
 
-        public CustomersController(ICustomerService service)
+        public CustomersController(ICustomerService customerService)
         {
-            _service = service;
+            _customerService = customerService;
         }
 
         // GET: api/Customers
@@ -25,7 +25,7 @@ namespace backend.Controllers
         [HttpGet]
         public async Task<IActionResult> GetCustomers(int page = 1, int pageSize = 20)
         {
-            var response = await _service.GetAllCustomersAsync(page, pageSize);
+            var response = await _customerService.GetAllCustomersAsync(page, pageSize);
 
             return Ok(response);
         }
@@ -40,7 +40,7 @@ namespace backend.Controllers
                 return BadRequest(ApiResponse<string>.Fail("Invalid customer ID"));
             }
 
-            var response = await _service.GetCustomerByIdAsync(id);
+            var response = await _customerService.GetCustomerByIdAsync(id);
 
             return Ok(response);
         }
@@ -52,7 +52,7 @@ namespace backend.Controllers
         {
             try
             {
-                var response = await _service.CreateCustomerAsync(dto);
+                var response = await _customerService.CreateCustomerAsync(dto);
 
                 if (response == null)
                 {
@@ -79,7 +79,7 @@ namespace backend.Controllers
         {
             try
             {
-                var response = await _service.UpdateCustomerAsync(id, dto);
+                var response = await _customerService.UpdateCustomerAsync(id, dto);
                 return Ok(response);
             }
             catch (Exception ex)
@@ -98,7 +98,7 @@ namespace backend.Controllers
                 return BadRequest(ApiResponse<string>.Fail("Invalid customer ID"));
             }
 
-            var response = await _service.DeleteCustomerAsync(id);
+            var response = await _customerService.DeleteCustomerAsync(id);
 
             return Ok(response);
         }
