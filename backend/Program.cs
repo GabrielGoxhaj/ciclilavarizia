@@ -48,7 +48,18 @@ namespace backend
             builder.Services.AddScoped<IOrderCommandService, OrderService>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
             builder.Services.AddScoped<IAccountManager, AccountManager>();
-            
+
+            builder.Services.AddCors(options =>
+            { 
+                options.AddPolicy("CorsPolicy",
+                                  policy =>
+                                  {
+                                      policy.WithOrigins("http://localhost:4200", "http://127.0.0.1:4200")
+                                            .AllowAnyHeader()
+                                            .AllowAnyMethod()
+                                            .AllowCredentials();
+                                  });
+            });
 
             var app = builder.Build();
 
@@ -58,6 +69,8 @@ namespace backend
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            app.UseCors("CorsPolicy");
 
             app.UseHttpsRedirection();
             app.UseAuthentication();
