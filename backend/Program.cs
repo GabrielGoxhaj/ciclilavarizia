@@ -76,7 +76,7 @@ namespace backend
             app.UseAuthentication();
             app.UseAuthorization();
 
-
+            app.UseStaticFiles(); // abilita file statici per leggere cartella wwwroot
             app.MapControllers();
 
             app.Run();

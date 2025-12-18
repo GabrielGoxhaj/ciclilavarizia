@@ -3,9 +3,7 @@ using backend.DTOs.Products;
 using backend.DTOs.Response;
 using backend.Models;
 using backend.Services.Interfaces;
-using Humanizer;
 using Microsoft.EntityFrameworkCore;
-using System.Drawing;
 
 namespace backend.Services
 {
@@ -54,6 +52,12 @@ namespace backend.Services
                         ProductModelId = p.ProductModel.ProductModelId,
                         Name = p.ProductModel.Name
                     },
+
+                    ThumbnailUrl = p.ThumbnailPhotoFileName != null
+                        ? $"/images/products/{p.ThumbnailPhotoFileName}"
+                        : "/images/products/placehold.webp",
+
+                    ThumbnailFileName = p.ThumbnailPhotoFileName,
 
                     // Step 1: selezioniamo SOLO l'ID della descrizione
                     Description = null // lo riempiamo dopo fuori dal LINQ
@@ -132,9 +136,9 @@ namespace backend.Services
                         Description = d.ProductDescription.Description
                     })
                     .FirstOrDefault(),
-                ThumbnailBase64 = product.ThumbNailPhoto != null
-                    ? Convert.ToBase64String(product.ThumbNailPhoto)
-                    : null,
+                ThumbnailUrl = product.ThumbnailPhotoFileName != null
+                    ? $"/images/products/{product.ThumbnailPhotoFileName}" 
+                    : "/images/products/placehold.webp",
 
                 ThumbnailFileName = product.ThumbnailPhotoFileName
             };
@@ -273,6 +277,12 @@ namespace backend.Services
                         ProductModelId = p.ProductModel.ProductModelId,
                         Name = p.ProductModel.Name
                     },
+
+                    ThumbnailUrl = p.ThumbnailPhotoFileName != null
+                        ? $"/images/products/{p.ThumbnailPhotoFileName}"
+                        : "/images/products/placehold.webp",
+
+                    ThumbnailFileName = p.ThumbnailPhotoFileName,
 
                     Description = null // ⭐ viene aggiunta dopo
                 })
@@ -443,9 +453,9 @@ namespace backend.Services
                     })
                     .FirstOrDefault(),
 
-                ThumbnailBase64 = p.ThumbNailPhoto != null
-                    ? Convert.ToBase64String(p.ThumbNailPhoto)
-                    : null,
+                ThumbnailUrl = p.ThumbnailPhotoFileName != null
+                    ? $"/images/products/{p.ThumbnailPhotoFileName}" 
+                    : "/images/products/placehold.webp",
 
                 ThumbnailFileName = p.ThumbnailPhotoFileName
             })
