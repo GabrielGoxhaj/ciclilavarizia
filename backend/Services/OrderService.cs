@@ -15,7 +15,7 @@ namespace backend.Services
             _context = context;
         }
 
-        public async Task<OrderDto> CreateOrderAsync(CreateOrderDto dto, int userId)
+        public async Task<OrderDto> CreateOrderAsync(CreateOrderDto dto, int customerId)
         {
             // Validazione DTO
             if (dto == null)
@@ -25,7 +25,7 @@ namespace backend.Services
                 throw new ArgumentException("The order must contain at least one item.");
 
             // Validazione cliente esistente
-            var customerExists = await _context.Customers.AnyAsync(c => c.CustomerId == dto.CustomerId);
+            var customerExists = await _context.Customers.AnyAsync(c => c.CustomerId == customerId);
             if (!customerExists)
                 throw new Exception("Customer not found.");
 
@@ -39,79 +39,94 @@ namespace backend.Services
             if (products.Count != productIds.Count)
                 throw new Exception("One or more products not found.");
 
-            // Calcoli e creazione header 
+            // Calcoli e creazione ordine in transazione
             decimal subTotal = 0;
 
-            var orderHeader = new SalesOrderHeader
-            {
-                CustomerId = dto.CustomerId,
-                UserId = userId,
-                OrderDate = DateTime.UtcNow,
-                Status = 1,
-                ShipMethod = "DEFAULT",
-                SubTotal = 0,
-                TaxAmt = 0,
-                Freight = 0,
-                TotalDue = 0
-            };
+            using var transaction = await _context.Database.BeginTransactionAsync();
 
-            _context.SalesOrderHeaders.Add(orderHeader);
-            await _context.SaveChangesAsync();
-
-            // Creazione dettagli ordine
-            foreach (var item in dto.Items)
+            try
             {
-                var product = products.First(p => p.ProductId == item.ProductId);
-                var lineTotal = product.ListPrice * item.Quantity;
-                subTotal += lineTotal;
-                var orderDetail = new SalesOrderDetail
+                var orderHeader = new SalesOrderHeader
                 {
-                    SalesOrderId = orderHeader.SalesOrderId,
-                    ProductId = product.ProductId,
-                    OrderQty = (short)item.Quantity,
-                    UnitPrice = product.ListPrice,
-                    UnitPriceDiscount = 0,
-                    LineTotal = lineTotal,
-                    ModifiedDate = DateTime.UtcNow
+                    CustomerId = customerId,
+                    OrderDate = DateTime.UtcNow,
+                    Status = 1,
+                    ShipMethod = "CARGO TRANSPORT 7",
+                    SubTotal = 0,
+                    TaxAmt = 0,
+                    Freight = 0,
+                    TotalDue = 0,
+                    ModifiedDate = DateTime.UtcNow,
+                    Rowguid = Guid.NewGuid() 
                 };
-                _context.SalesOrderDetails.Add(orderDetail);
 
+                _context.SalesOrderHeaders.Add(orderHeader);
+                await _context.SaveChangesAsync(); // Genera SalesOrderId
+
+                foreach (var item in dto.Items)
+                {
+                    var product = products.First(p => p.ProductId == item.ProductId);
+                    var lineTotal = product.ListPrice * item.Quantity;
+                    subTotal += lineTotal;
+
+                    var orderDetail = new SalesOrderDetail
+                    {
+                        SalesOrderId = orderHeader.SalesOrderId,
+                        ProductId = product.ProductId,
+                        OrderQty = (short)item.Quantity,
+                        UnitPrice = product.ListPrice,
+                        UnitPriceDiscount = 0,
+                        LineTotal = lineTotal,
+                        ModifiedDate = DateTime.UtcNow,
+                        Rowguid = Guid.NewGuid() 
+                    };
+                    _context.SalesOrderDetails.Add(orderDetail);
+                }
+
+                // Aggiornamento totali Header
+                orderHeader.SubTotal = subTotal;
+                orderHeader.TaxAmt = subTotal * 0.22m; // IVA 22%
+                orderHeader.Freight = 5m;
+                orderHeader.TotalDue = orderHeader.SubTotal + orderHeader.TaxAmt + orderHeader.Freight;
+
+                await _context.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+
+                var result = await GetMyOrderByIdAsync(customerId, orderHeader.SalesOrderId);
+
+                if (result == null)
+                    throw new Exception("Errore nel recupero dell'ordine creato.");
+
+                return result;
             }
-
-            // Calcoli finali
-            orderHeader.SubTotal = subTotal;
-            orderHeader.TaxAmt = subTotal * 0.22m; // IVA 22%
-            orderHeader.Freight = 5m; // fisso per esempio
-            orderHeader.TotalDue = orderHeader.SubTotal + orderHeader.TaxAmt + orderHeader.Freight;
-
-            await _context.SaveChangesAsync();
-
-            // Restituzione ordine completo
-            return await GetMyOrderByIdAsync(userId, orderHeader.SalesOrderId)
-                    ?? throw new Exception("Errore nel recupero dell'ordine creato.");
-
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
 
         // USER METHODS
-        public async Task<List<OrderDto>> GetMyOrdersAsync(int userId)
+        public async Task<List<OrderDto>> GetMyOrdersAsync(int customerId)
         {
             var orders = await _context.SalesOrderHeaders
                 .Include(o => o.SalesOrderDetails)
                     .ThenInclude(d => d.Product)
-                .Where(o => o.UserId == userId)
+                .Where(o => o.CustomerId == customerId)
                 .OrderByDescending(o => o.OrderDate)
                 .ToListAsync();
 
             return orders.Select(MapToDto).ToList();
         }
-        public async Task<OrderDto> GetMyOrderByIdAsync(int userId, int orderId)
+        public async Task<OrderDto> GetMyOrderByIdAsync(int customerId, int orderId)
         {
             var order = await _context.SalesOrderHeaders
                 .Include(o => o.SalesOrderDetails)
                     .ThenInclude(d => d.Product)
                 .FirstOrDefaultAsync(o =>
                     o.SalesOrderId == orderId &&
-                    o.UserId == userId);
+                    o.CustomerId == customerId);
 
             return order != null ? MapToDto(order) : null;
         }

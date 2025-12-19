@@ -6,8 +6,6 @@ using backend.DTOs.Response;
 using backend.Models;
 using backend.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System.Drawing;
-using System.Security.Policy;
 
 namespace backend.Services
 {
@@ -254,5 +252,18 @@ namespace backend.Services
             return ApiResponse<string>.Success("Customer deleted successfully");
         }
 
+        public async Task<int> GetCustomerIdBySecurityIdAsync(int securityUserId)
+        {
+            var customer = await _context.Customers
+                .AsNoTracking() // sola lettura
+                .FirstOrDefaultAsync(c => c.FkUserLogins == securityUserId);
+
+            if (customer == null)
+            {
+                throw new Exception($"No customer profile found for securityUserId = {securityUserId}");
+            }
+
+            return customer.CustomerId;
+        }
     }
 }

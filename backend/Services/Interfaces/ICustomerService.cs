@@ -11,5 +11,6 @@ namespace backend.Services.Interfaces
         Task CreateOrUpdateCustomerProfileAsync(CustomerRegistrationDto dto, int securityUserId);
         Task<ApiResponse<CustomerDto>> UpdateCustomerAsync(int id, CustomerUpdateDto dto);
         Task<ApiResponse<string>> DeleteCustomerAsync(int id);
+        Task<int> GetCustomerIdBySecurityIdAsync(int securityUserId);
     }
 }

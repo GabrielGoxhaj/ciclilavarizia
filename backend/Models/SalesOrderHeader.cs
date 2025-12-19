@@ -103,9 +103,6 @@ public partial class SalesOrderHeader
     /// </summary>
     public decimal TotalDue { get; set; }
 
-
-    public int UserId { get; set; }
-
     /// <summary>
     /// Sales representative comments.
     /// </summary>

@@ -2,7 +2,6 @@
 {
     public class CreateOrderDto
     {
-        public int CustomerId { get; set; }
         public List<CreateOrderDetailDto> Items { get; set; } = new();
     }
 

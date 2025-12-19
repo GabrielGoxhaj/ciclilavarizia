@@ -1,5 +1,7 @@
 ﻿using backend.DTOs.Orders;
+using backend.Services;
 using backend.Services.Interfaces;
+using Humanizer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -13,13 +15,13 @@ namespace backend.Controllers
 
         private readonly IOrderCommandService _commandService;
         private readonly IOrderQueryService _queryService;
+        private readonly ICustomerService _customerService;
 
-        public OrdersController(
-            IOrderCommandService commandService,
-            IOrderQueryService queryService)
+        public OrdersController(IOrderCommandService commandService, IOrderQueryService queryService, ICustomerService customerService)
         {
             _commandService = commandService;
             _queryService = queryService;
+            _customerService = customerService;
         }
 
         // CREATE ORDER (USER)
@@ -27,8 +29,10 @@ namespace backend.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDto dto)
         {
-            var userId = GetUserId();
-            var order = await _commandService.CreateOrderAsync(dto, userId);
+            var securityUserId = GetUserId();
+            var customerId = await _customerService.GetCustomerIdBySecurityIdAsync(securityUserId);
+
+            var order = await _commandService.CreateOrderAsync(dto, customerId);
             return Ok(order);
         }
 
@@ -37,8 +41,9 @@ namespace backend.Controllers
         [HttpGet("my")]
         public async Task<IActionResult> GetMyOrders()
         {
-            var userId = GetUserId();
-            var orders = await _queryService.GetMyOrdersAsync(userId);
+            var securityUserId = GetUserId();
+            var customerId = await _customerService.GetCustomerIdBySecurityIdAsync(securityUserId);
+            var orders = await _queryService.GetMyOrdersAsync(customerId);
             return Ok(orders);
         }
 
@@ -47,8 +52,9 @@ namespace backend.Controllers
         [HttpGet("my/{orderId}")]
         public async Task<IActionResult> GetMyOrderById(int orderId)
         {
-            var userId = GetUserId();
-            var order = await _queryService.GetMyOrderByIdAsync(userId, orderId);
+            var securityUserId = GetUserId();
+            var customerId = await _customerService.GetCustomerIdBySecurityIdAsync(securityUserId);
+            var order = await _queryService.GetMyOrderByIdAsync(customerId, orderId);
 
             if (order == null)
                 return NotFound("Order not found");

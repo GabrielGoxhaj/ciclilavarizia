@@ -5,8 +5,8 @@ namespace backend.Services.Interfaces
     public interface IOrderQueryService 
     {
         // USER
-        Task<List<OrderDto>> GetMyOrdersAsync(int userId);
-        Task<OrderDto?> GetMyOrderByIdAsync(int orderId, int userId);
+        Task<List<OrderDto>> GetMyOrdersAsync(int customerId);
+        Task<OrderDto?> GetMyOrderByIdAsync(int orderId, int customerId);
 
         // ADMIN
         Task<List<OrderDto>> GetOrdersByCustomerIdAsync(int customerId);
