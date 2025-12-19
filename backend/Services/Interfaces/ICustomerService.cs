@@ -1,4 +1,5 @@
-﻿using backend.DTOs.Customers;
+﻿using backend.DTOs.Address;
+using backend.DTOs.Customers;
 using backend.DTOs.Response;
 
 namespace backend.Services.Interfaces
@@ -12,5 +13,6 @@ namespace backend.Services.Interfaces
         Task<ApiResponse<CustomerDto>> UpdateCustomerAsync(int id, CustomerUpdateDto dto);
         Task<ApiResponse<string>> DeleteCustomerAsync(int id);
         Task<int> GetCustomerIdBySecurityIdAsync(int securityUserId);
+        Task<List<AddressDto>> GetAddressesByCustomerIdAsync(int customerId);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using backend.Data;
+using backend.DTOs.Address;
 using backend.DTOs.Customers;
 using backend.DTOs.Response;
 using backend.Models;
@@ -6,6 +7,7 @@ using backend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace backend.Controllers
 {
@@ -101,6 +103,26 @@ namespace backend.Controllers
             var response = await _customerService.DeleteCustomerAsync(id);
 
             return Ok(response);
+        }
+
+        [Authorize]
+        [HttpGet("my-addresses")]
+        public async Task<ActionResult<ApiResponse<List<AddressDto>>>> GetMyAddresses()
+        {
+            try
+            {
+                var securityUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+                var customerId = await _customerService.GetCustomerIdBySecurityIdAsync(securityUserId);
+
+                var addresses = await _customerService.GetAddressesByCustomerIdAsync(customerId);
+
+                return Ok(ApiResponse<List<AddressDto>>.Success(addresses, "Addresses retrieved successfully"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<string>.Fail(ex.Message));
+            }
         }
     }
 }

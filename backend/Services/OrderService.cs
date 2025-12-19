@@ -15,7 +15,7 @@ namespace backend.Services
             _context = context;
         }
 
-        public async Task<OrderDto> CreateOrderAsync(CreateOrderDto dto, int customerId)
+        public async Task<OrderDto> CreateOrderAsync(CreateOrderDto dto, int customerId) // TODO: modificare per assegnare indirizzo all'OrderHeader
         {
             // Validazione DTO
             if (dto == null)

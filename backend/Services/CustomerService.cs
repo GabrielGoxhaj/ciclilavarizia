@@ -265,5 +265,27 @@ namespace backend.Services
 
             return customer.CustomerId;
         }
+
+        public async Task<List<AddressDto>> GetAddressesByCustomerIdAsync(int customerId)
+        {
+            var addresses = await _context.CustomerAddresses
+                .AsNoTracking()
+                .Include(ca => ca.Address) // Join con la tabella indirizzi reale
+                .Where(ca => ca.CustomerId == customerId)
+                .Select(ca => new AddressDto
+                {
+                    AddressId = ca.Address.AddressId,
+                    AddressType = ca.AddressType, // es. "Shipping"
+                    AddressLine1 = ca.Address.AddressLine1,
+                    AddressLine2 = ca.Address.AddressLine2,
+                    City = ca.Address.City,
+                    StateProvince = ca.Address.StateProvince,
+                    CountryRegion = ca.Address.CountryRegion,
+                    PostalCode = ca.Address.PostalCode
+                })
+                .ToListAsync();
+
+            return addresses;
+        }
     }
 }
