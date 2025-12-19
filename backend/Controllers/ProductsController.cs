@@ -115,7 +115,7 @@ namespace backend.Controllers
         }
 
         [HttpGet("search")]
-        public async Task<ActionResult<ApiResponse<List<ProductDto>>>> GetFilteredProducts(
+        public async Task<ActionResult<ApiResponse<List</*ProductDto*/ ProductListItemDto>>>> GetFilteredProducts(
             string? search,
             int? categoryId,
             decimal? minPrice,
