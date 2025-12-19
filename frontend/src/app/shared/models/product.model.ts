@@ -34,6 +34,16 @@ export interface Product {
   description?: ProductDescription;
 }
 
+export interface ProductListItem {
+  productId: number;
+  name: string;
+  productNumber: string;
+  listPrice: number;
+  thumbnailUrl: string;
+  isAvailable: boolean;
+  description?: string;
+}
+
 export interface ProductFilter {
   search?: string;
   categoryId?: number;

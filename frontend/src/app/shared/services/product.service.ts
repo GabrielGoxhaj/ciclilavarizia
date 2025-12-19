@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ApiResponse } from '../models/api-response.model';
-import { Category, Product, ProductFilter } from '../models/product.model';
+import { Category, Product, ProductFilter, ProductListItem } from '../models/product.model';
 
 @Injectable({
   providedIn: 'root',
@@ -12,7 +12,7 @@ export class ProductService {
   private http = inject(HttpClient);
   private baseUrl = environment.apiUrl;
 
-  getProducts(filter: ProductFilter): Observable<ApiResponse<Product[]>> {
+  getProducts(filter: ProductFilter): Observable<ApiResponse<ProductListItem[]>> {
     let params = new HttpParams().set('page', filter.page).set('pageSize', filter.pageSize);
 
     if (filter.search) params = params.set('search', filter.search);
@@ -23,7 +23,7 @@ export class ProductService {
     if (filter.size) params = params.set('size', filter.size);
     if (filter.sort) params = params.set('sort', filter.sort);
 
-    return this.http.get<ApiResponse<Product[]>>(`${this.baseUrl}/products/search`, { params });
+    return this.http.get<ApiResponse<ProductListItem[]>>(`${this.baseUrl}/products/search`, { params });
   }
 
   // GET: api/Products/{id}
