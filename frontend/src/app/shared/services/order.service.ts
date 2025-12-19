@@ -4,7 +4,6 @@ import { environment } from '../../../environments/environment';
 import { CreateOrderRequest, Order } from '../models/order.model';
 import { Observable } from 'rxjs';
 import { ApiResponse } from '../models/api-response.model';
-import { AddressDto } from '../models/auth.model';
 
 @Injectable({
   providedIn: 'root',
@@ -27,9 +26,4 @@ export class OrderService {
   getOrderById(orderId: number): Observable<ApiResponse<Order>> {
     return this.http.get<ApiResponse<Order>>(`${this.baseUrl}/orders/my/${orderId}`);
   }
-
-  // GET: api/Customers/my-addresses
-  getMyAddresses(): Observable<ApiResponse<AddressDto[]>> {
-  return this.http.get<ApiResponse<AddressDto[]>>(`${this.baseUrl}/customers/my-addresses`);
-}
 }
