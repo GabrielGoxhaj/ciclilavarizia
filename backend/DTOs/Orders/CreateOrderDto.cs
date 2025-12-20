@@ -1,11 +1,11 @@
-﻿using System.Runtime.ConstrainedExecution;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace backend.DTOs.Orders
 {
     public class CreateOrderDto
     {
-        // TODO: modificare per accettare un ShippingAddressId(o i dati dell'indirizzo)
+        [Required]
+        public int AddressId { get; set; }
         public List<CreateOrderDetailDto> Items { get; set; } = new();
     }
 

@@ -266,6 +266,47 @@ namespace backend.Services
             return customer.CustomerId;
         }
 
+        public async Task<AddressDto> AddAddressAsync(int customerId, CreateAddressDto dto)
+        {
+            var customer = await _context.Customers.FindAsync(customerId);
+            if (customer == null) throw new Exception("Customer not found");
+
+            var newAddress = new Address
+            {
+                AddressLine1 = dto.AddressLine1,
+                City = dto.City,
+                StateProvince = dto.StateProvince,
+                CountryRegion = dto.CountryRegion,
+                PostalCode = dto.PostalCode,
+                Rowguid = Guid.NewGuid(),
+                ModifiedDate = DateTime.UtcNow
+            };
+
+            var customerAddress = new CustomerAddress
+            {
+                CustomerId = customerId,
+                Address = newAddress, 
+                AddressType = "Shipping",
+                Rowguid = Guid.NewGuid(),
+                ModifiedDate = DateTime.UtcNow
+            };
+
+            _context.CustomerAddresses.Add(customerAddress);
+            await _context.SaveChangesAsync();
+
+            return new AddressDto
+            {
+                AddressId = newAddress.AddressId,
+                AddressType = customerAddress.AddressType,
+                AddressLine1 = newAddress.AddressLine1,
+                AddressLine2 = newAddress.AddressLine2,
+                City = newAddress.City,
+                StateProvince = newAddress.StateProvince,
+                CountryRegion = newAddress.CountryRegion,
+                PostalCode = newAddress.PostalCode
+            };
+        }
+
         public async Task<List<AddressDto>> GetAddressesByCustomerIdAsync(int customerId)
         {
             var addresses = await _context.CustomerAddresses

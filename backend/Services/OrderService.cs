@@ -24,10 +24,18 @@ namespace backend.Services
             if (dto.Items == null || dto.Items.Count == 0)
                 throw new ArgumentException("The order must contain at least one item.");
 
+            if (dto.AddressId <= 0) throw new ArgumentException("Invalid Address ID.");
+
             // Validazione cliente esistente
             var customerExists = await _context.Customers.AnyAsync(c => c.CustomerId == customerId);
             if (!customerExists)
                 throw new Exception("Customer not found.");
+
+            var addressIsValid = await _context.CustomerAddresses
+                .AnyAsync(ca => ca.CustomerId == customerId && ca.AddressId == dto.AddressId);
+
+            if (!addressIsValid)
+                throw new Exception("The selected address is invalid or does not belong to the customer.");
 
             // Verifica che tutti i prodotti esistano
             var productIds = dto.Items.Select(i => i.ProductId).ToList();
@@ -52,6 +60,8 @@ namespace backend.Services
                     OrderDate = DateTime.UtcNow,
                     Status = 1,
                     ShipMethod = "CARGO TRANSPORT 7",
+                    ShipToAddressId = dto.AddressId,
+                    BillToAddressId = dto.AddressId,
                     SubTotal = 0,
                     TaxAmt = 0,
                     Freight = 0,
@@ -96,7 +106,7 @@ namespace backend.Services
                 var result = await GetMyOrderByIdAsync(customerId, orderHeader.SalesOrderId);
 
                 if (result == null)
-                    throw new Exception("Errore nel recupero dell'ordine creato.");
+                    throw new Exception("Error retrieving the order created.");
 
                 return result;
             }

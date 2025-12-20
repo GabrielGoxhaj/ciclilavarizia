@@ -106,6 +106,25 @@ namespace backend.Controllers
         }
 
         [Authorize]
+        [HttpPost("addresses")]
+        public async Task<ActionResult<ApiResponse<AddressDto>>> AddAddress([FromBody] CreateAddressDto dto)
+        {
+            try
+            {
+                var securityUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+                var customerId = await _customerService.GetCustomerIdBySecurityIdAsync(securityUserId);
+
+                var newAddress = await _customerService.AddAddressAsync(customerId, dto);
+
+                return Ok(ApiResponse<AddressDto>.Success(newAddress, "Address added successfully"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<string>.Fail(ex.Message));
+            }
+        }
+
+        [Authorize]
         [HttpGet("my-addresses")]
         public async Task<ActionResult<ApiResponse<List<AddressDto>>>> GetMyAddresses()
         {
