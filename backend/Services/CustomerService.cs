@@ -6,8 +6,6 @@ using backend.DTOs.Response;
 using backend.Models;
 using backend.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System.Drawing;
-using System.Security.Policy;
 
 namespace backend.Services
 {
@@ -154,6 +152,67 @@ namespace backend.Services
             return ApiResponse<CustomerDto>.Success(result, "Customer created successfully");
         }
 
+        public async Task CreateOrUpdateCustomerProfileAsync(CustomerRegistrationDto dto, int securityUserId)
+        {
+            var existingCustomer = await _context.Customers
+                .FirstOrDefaultAsync(c => c.EmailAddress == dto.Email);
+
+            Customer customerToProcess;
+
+            if (existingCustomer != null) // utente 'storico' del db CicliLavarizia
+            {
+                existingCustomer.FkUserLogins = securityUserId; // aggiunge collegamento.
+                existingCustomer.ModifiedDate = DateTime.UtcNow;
+                customerToProcess = existingCustomer;
+            }
+            else // nuovo utente
+            {
+                customerToProcess = new Customer
+                {
+                    FirstName = dto.FirstName,
+                    LastName = dto.LastName,
+                    EmailAddress = dto.Email,
+                    Phone = dto.Phone,
+                    FkUserLogins = securityUserId, 
+                    ModifiedDate = DateTime.UtcNow,
+                    Rowguid = Guid.NewGuid()
+                };
+
+                _context.Customers.Add(customerToProcess);
+            }
+
+            // gestione addresses, se forniti durante la registrazione
+            if (dto.Addresses != null && dto.Addresses.Any()) 
+            {
+                foreach (var addrDto in dto.Addresses)
+                {
+                    var newAddress = new Address
+                    {
+                        AddressLine1 = addrDto.AddressLine1,
+                        City = addrDto.City,
+                        StateProvince = addrDto.StateProvince,
+                        CountryRegion = addrDto.CountryRegion,
+                        PostalCode = addrDto.PostalCode,
+                        ModifiedDate = DateTime.UtcNow,
+                        Rowguid = Guid.NewGuid()
+                    };
+
+                    var customerAddress = new CustomerAddress
+                    {
+                        Customer = customerToProcess,
+                        Address = newAddress,
+                        AddressType = addrDto.AddressType, // "Shipping", hardcoded nel Dto...
+                        ModifiedDate = DateTime.UtcNow,
+                        Rowguid = Guid.NewGuid()
+                    };
+
+                    _context.CustomerAddresses.Add(customerAddress);
+                }
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<ApiResponse<CustomerDto>> UpdateCustomerAsync(int id, CustomerUpdateDto dto)
         {
             var customer = await _context.Customers.FindAsync(id);
@@ -193,5 +252,81 @@ namespace backend.Services
             return ApiResponse<string>.Success("Customer deleted successfully");
         }
 
+        public async Task<int> GetCustomerIdBySecurityIdAsync(int securityUserId)
+        {
+            var customer = await _context.Customers
+                .AsNoTracking() // sola lettura
+                .FirstOrDefaultAsync(c => c.FkUserLogins == securityUserId);
+
+            if (customer == null)
+            {
+                throw new Exception($"No customer profile found for securityUserId = {securityUserId}");
+            }
+
+            return customer.CustomerId;
+        }
+
+        public async Task<AddressDto> AddAddressAsync(int customerId, CreateAddressDto dto)
+        {
+            var customer = await _context.Customers.FindAsync(customerId);
+            if (customer == null) throw new Exception("Customer not found");
+
+            var newAddress = new Address
+            {
+                AddressLine1 = dto.AddressLine1,
+                City = dto.City,
+                StateProvince = dto.StateProvince,
+                CountryRegion = dto.CountryRegion,
+                PostalCode = dto.PostalCode,
+                Rowguid = Guid.NewGuid(),
+                ModifiedDate = DateTime.UtcNow
+            };
+
+            var customerAddress = new CustomerAddress
+            {
+                CustomerId = customerId,
+                Address = newAddress, 
+                AddressType = "Shipping",
+                Rowguid = Guid.NewGuid(),
+                ModifiedDate = DateTime.UtcNow
+            };
+
+            _context.CustomerAddresses.Add(customerAddress);
+            await _context.SaveChangesAsync();
+
+            return new AddressDto
+            {
+                AddressId = newAddress.AddressId,
+                AddressType = customerAddress.AddressType,
+                AddressLine1 = newAddress.AddressLine1,
+                AddressLine2 = newAddress.AddressLine2,
+                City = newAddress.City,
+                StateProvince = newAddress.StateProvince,
+                CountryRegion = newAddress.CountryRegion,
+                PostalCode = newAddress.PostalCode
+            };
+        }
+
+        public async Task<List<AddressDto>> GetAddressesByCustomerIdAsync(int customerId)
+        {
+            var addresses = await _context.CustomerAddresses
+                .AsNoTracking()
+                .Include(ca => ca.Address) // Join con la tabella indirizzi reale
+                .Where(ca => ca.CustomerId == customerId)
+                .Select(ca => new AddressDto
+                {
+                    AddressId = ca.Address.AddressId,
+                    AddressType = ca.AddressType, // es. "Shipping"
+                    AddressLine1 = ca.Address.AddressLine1,
+                    AddressLine2 = ca.Address.AddressLine2,
+                    City = ca.Address.City,
+                    StateProvince = ca.Address.StateProvince,
+                    CountryRegion = ca.Address.CountryRegion,
+                    PostalCode = ca.Address.PostalCode
+                })
+                .ToListAsync();
+
+            return addresses;
+        }
     }
 }

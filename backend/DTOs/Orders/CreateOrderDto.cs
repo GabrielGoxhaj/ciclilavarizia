@@ -1,8 +1,11 @@
-﻿namespace backend.DTOs.Orders
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace backend.DTOs.Orders
 {
     public class CreateOrderDto
     {
-        public int CustomerId { get; set; }
+        [Required]
+        public int AddressId { get; set; }
         public List<CreateOrderDetailDto> Items { get; set; } = new();
     }
 

@@ -1,3 +1,4 @@
+using AuthLibrary.Security;
 using backend.Data;
 using backend.Services;
 using backend.Services.Interfaces;
@@ -5,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Transactions;
 
 namespace backend
 {
@@ -12,6 +14,9 @@ namespace backend
     {
         public static void Main(string[] args)
         {
+            // https://github.com/dotnet/runtime/issues/80777
+            TransactionManager.ImplicitDistributedTransactions = true; // vedi link sopra
+
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
@@ -26,33 +31,35 @@ namespace backend
                 options.UseSqlServer(builder.Configuration.GetConnectionString("AuthConnection")));
 
 
-            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
-                {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(
-                            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
-
-                        ValidateIssuer = true,
-                        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-
-                        ValidateAudience = true,
-                        ValidAudience = builder.Configuration["Jwt:Audience"],
-
-                        ValidateLifetime = true,
-                        ClockSkew = TimeSpan.Zero
-                    };
-                });
+            builder.Services.AddScoped<JwtTokenGenerator>(sp =>
+            {
+                var config = sp.GetRequiredService<IConfiguration>();
+                return new JwtTokenGenerator(
+                    config["Jwt:Key"]!,
+                    config["Jwt:Issuer"]!,
+                    config["Jwt:Audience"]!
+                );
+            });
 
             // Registrazione dei servizi personalizzati
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<ICustomerService, CustomerService>();
             builder.Services.AddScoped<IProductService, ProductService>();
-            builder.Services.AddScoped<IOrderService, OrderService>();
+            builder.Services.AddScoped<IOrderCommandService, OrderService>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
-            
+            builder.Services.AddScoped<IAccountManager, AccountManager>();
+
+            builder.Services.AddCors(options =>
+            { 
+                options.AddPolicy("CorsPolicy",
+                                  policy =>
+                                  {
+                                      policy.WithOrigins("http://localhost:4200", "http://127.0.0.1:4200")
+                                            .AllowAnyHeader()
+                                            .AllowAnyMethod()
+                                            .AllowCredentials();
+                                  });
+            });
 
             var app = builder.Build();
 
@@ -63,11 +70,13 @@ namespace backend
                 app.UseSwaggerUI();
             }
 
+            app.UseCors("CorsPolicy");
+
             app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseAuthorization();
 
-
+            app.UseStaticFiles(); // abilita file statici per leggere cartella wwwroot
             app.MapControllers();
 
             app.Run();

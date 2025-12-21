@@ -1,13 +1,75 @@
+@import "tailwindcss";
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
 /* You can add global styles to this file, and also import other style files */
 
-@import '@angular/material/prebuilt-themes/indigo-pink.css';
+html, body {
+    height: 100%;
+}
 
-/* Global styles */
 body {
-  margin: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
-  background: #f5f7fa;
-  color: #1f2933;
+    margin: 0;
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+    box-sizing: border-box;
+    background: #f5f7fa;
+    color: #1f2933;
+}
+
+/* Style to fix the weird border with angular material + tailwindcss */
+.mdc-notched-outline__notch {
+    border-right: none !important;
+}
+
+.mat-mdc-form-field {
+    background-color: white; 
+}
+
+.mat-mdc-form-field-icon-prefix,
+.mat-mdc-form-field-icon-suffix {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100% !important; 
+    padding: 0 4px;
+}
+
+.mat-mdc-input-element {
+    margin-top: -2px; 
+}
+
+/* icon button form field reset */
+.mat-mdc-icon-button {
+    padding: 0 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* suffix icon form field */
+.mat-mdc-form-field-icon-suffix .mat-mdc-icon-button {
+    height: 24px !important;
+    width: 24px !important;
+    padding: 0 !important; 
+    display: flex !important;
+    align-items: center;
+    justify-content: center; 
+    margin-right: 8px !important;     
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+.mat-mdc-form-field-icon-suffix .mat-icon {
+    font-size: 20px !important;
+    width: 20px !important;
+    height: 20px !important;
+    line-height: 20px !important;
+}
+
+.elevated {
+    box-shadow: var(--mat-sys-level1);
+}
+
+.danger {
+    color: var(--mat-sys-error);
 }
 
 /* Layout */
@@ -79,6 +141,12 @@ body {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 1rem;
+}
+
+.responsive-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 1rem;
 }
 
 .products-list {

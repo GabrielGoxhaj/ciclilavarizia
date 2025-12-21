@@ -4,59 +4,68 @@ using backend.DTOs.Response;
 using backend.Models;
 using backend.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
+using AuthLibrary.Security;
+using backend.DTOs.Customers;
+
 
 namespace backend.Services
 {
     public class AuthService : IAuthService
     {
         private readonly AuthDbContext _context;
-        private readonly IConfiguration _config;
+        private readonly JwtTokenGenerator _tokenGenerator;
 
-        public AuthService(AuthDbContext context, IConfiguration config)
+        public AuthService(AuthDbContext context, JwtTokenGenerator tokenGenerator)
         {
             _context = context;
-            _config = config;
+            _tokenGenerator = tokenGenerator;
         }
 
-        public void CreatePasswordHash(string password, out byte[] hash, out byte[] salt)
-        {
-            using var hmac = new HMACSHA512();
-            salt = hmac.Key;
-            hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
-        }
+        //public async Task<ApiResponse<string>> Register(UserRegisterDto dto)
+        //{
+        //    if (await _context.Users.AnyAsync(u => u.Email == dto.Email))
+        //        return ApiResponse<string>.Fail("Email already in use.");
 
-        private bool VerifyPasswordHash(string password, byte[] storedHash, byte[] storedSalt)
-        {
-            using var hmac = new HMACSHA512(storedSalt);
-            var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
-            return computedHash.SequenceEqual(storedHash);
-        }
+        //    PasswordHasher.CreateHash(dto.Password, out byte[] passwordHash, out byte[] passwordSalt);
 
-        public async Task<ApiResponse<string>> Register(UserRegisterDto dto)
+        //    var user = new AppUser
+        //    {
+        //        Username = dto.Username,
+        //        Email = dto.Email,
+        //        PasswordHash = passwordHash,
+        //        PasswordSalt = passwordSalt
+        //    };
+
+        //    _context.Users.Add(user);
+        //    await _context.SaveChangesAsync();
+
+        //    return ApiResponse<string>.Success("User registered");
+        //}
+
+        public async Task<int> CreateCredentialsAsync(CustomerRegistrationDto dto) // email e username univoci.
         {
             if (await _context.Users.AnyAsync(u => u.Email == dto.Email))
-                return ApiResponse<string>.Fail("Email already in use.");
+                throw new Exception("Email already exists in Security DB.");
 
-            CreatePasswordHash(dto.Password, out byte[] passwordHash, out byte[] passwordSalt);
+            if (await _context.Users.AnyAsync(u => u.Username == dto.Username))
+                throw new Exception($"Username '{dto.Username}' already exists in Security DB.");
+
+            PasswordHasher.CreateHash(dto.Password, out byte[] passwordHash, out byte[] passwordSalt);
 
             var user = new AppUser
             {
                 Username = dto.Username,
                 Email = dto.Email,
                 PasswordHash = passwordHash,
-                PasswordSalt = passwordSalt
+                PasswordSalt = passwordSalt,
             };
 
             _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(); // genera Id/FkUserLogins per collegamento tra i db CicliLavarizia e CicliLavariziaAuth
 
-            return ApiResponse<string>.Success("User registered");
+            return user.Id;
         }
 
         public async Task<ApiResponse<AuthResponseDto>> Login(UserLoginDto dto)
@@ -66,10 +75,15 @@ namespace backend.Services
             if (user == null)
                 return ApiResponse<AuthResponseDto>.Fail("User not found");
 
-            if (!VerifyPasswordHash(dto.Password, user.PasswordHash, user.PasswordSalt))
+            if (!PasswordHasher.Verify(dto.Password, user.PasswordHash, user.PasswordSalt))
                 return ApiResponse<AuthResponseDto>.Fail("Invalid credentials");
 
-            var token = CreateToken(user);
+            var token = _tokenGenerator.CreateToken(
+                  user.Id,
+                  user.Username,
+                  user.Email,
+                  user.Role
+            );
 
             return ApiResponse<AuthResponseDto>.Success(
                 new AuthResponseDto 
@@ -80,30 +94,6 @@ namespace backend.Services
                 },
                 "Login successful"
             );
-        }
-
-        private string CreateToken(AppUser user)
-        {
-            var claims = new[]
-            {
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Name, user.Username),
-            new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimTypes.Role, user.Role)
-        };
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var token = new JwtSecurityToken(
-                issuer: _config["Jwt:Issuer"],
-                audience: _config["Jwt:Audience"],
-                claims: claims,
-                expires: DateTime.UtcNow.AddHours(2),
-                signingCredentials: creds
-            );
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }
