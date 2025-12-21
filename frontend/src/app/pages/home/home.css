@@ -1,31 +1,10 @@
+/* All component utilities moved to markup with Tailwind classes. Keep minimal placeholder here for legacy uses. */
+
 .home {
   width: 100%;
 }
 
-/* Hero Section */
-.hero {
-  background: linear-gradient(135deg, #c41e3a 0%, #dc2f45 100%);
-  padding: 4rem 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 3rem;
-  min-height: 400px;
-  color: white;
-}
 
-.hero-content {
-  flex: 1;
-  max-width: 500px;
-}
-
-.hero-content h1 {
-  font-size: 3.5rem;
-  font-weight: 700;
-  margin: 0 0 1rem 0;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-}
 
 .hero-content p {
   font-size: 1.25rem;
