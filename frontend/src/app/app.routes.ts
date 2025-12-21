@@ -23,5 +23,21 @@ export const routes: Routes = [
     path: 'contact',
     loadComponent: () => import('./pages/contact/contact').then((m) => m.ContactComponent),
   },
+  {
+    path: 'privacy',
+    loadComponent: () => import('./pages/privacy/privacy').then((m) => m.PrivacyComponent),
+  },
+  {
+    path: 'terms',
+    loadComponent: () => import('./pages/terms/terms').then((m) => m.TermsComponent),
+  },
+  {
+    path: 'cookies',
+    loadComponent: () => import('./pages/cookies/cookies').then((m) => m.CookiesComponent),
+  },
+  {
+    path: 'disclaimer',
+    loadComponent: () => import('./pages/disclaimer/disclaimer').then((m) => m.DisclaimerComponent),
+  },
   { path: '**', redirectTo: '/products' },
 ];
