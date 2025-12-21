@@ -2,6 +2,37 @@
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
 /* You can add global styles to this file, and also import other style files */
 
+@layer components {
+  .page-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12;
+  }
+
+  .page-hero {
+    @apply text-center mb-12 py-12 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg;
+  }
+
+  .page-content {
+    @apply space-y-8 max-w-4xl mx-auto text-gray-700;
+  }
+
+  .page-content h1 {
+    @apply text-2xl sm:text-3xl font-semibold mb-4 text-gray-900;
+  }
+
+  .page-content p {
+    @apply text-gray-700;
+  }
+
+  .titolo {
+    @apply text-3xl sm:text-4xl font-extrabold;
+  }
+
+  .sottotitolo {
+    @apply mt-4 text-lg sm:text-xl opacity-90 mx-auto text-center;
+  }
+
+} 
+
 html, body {
     height: 100%;
 }

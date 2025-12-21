@@ -1,3 +1,1 @@
-.container { max-width: 900px; margin: 0 auto; padding: 0 1rem; }
-h1 { color: #111827; }
-p { color: #374151; }
+/* Styles moved to Tailwind in src/styles.css - use .page-content h1 / .page-content p for content styles */
