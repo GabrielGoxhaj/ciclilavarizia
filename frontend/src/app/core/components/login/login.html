@@ -1,0 +1,86 @@
+<div class="p-8 max-w-100 flex flex-col">
+    <div class="flex justify-between items-start">
+        <div>
+            <h2 class="text-xl font-medium mb-1 text-gray-800">Benvenuto</h2>
+            <p class="text-sm text-gray-500">
+                Accedi al tuo account per continuare
+            </p>
+        </div>
+        <button tabindex="-1" mat-icon-button class="-mt-2 -mr-2 text-gray-500" mat-dialog-close>
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+
+    <form class="mt-6" [formGroup]="signInForm" (ngSubmit)="signIn()">
+        
+        <mat-form-field class="w-full mb-4" appearance="outline">
+            <mat-label>Email</mat-label>
+            <input
+                matInput
+                formControlName="email"
+                type="email"
+                placeholder="email@example.com"
+            />
+            <mat-icon matPrefix class="mr-2 text-gray-400">email</mat-icon>
+            @if (signInForm.get('email')?.hasError('required')) {
+                <mat-error>L'email è obbligatoria</mat-error>
+            }
+            @if (signInForm.get('email')?.hasError('email')) {
+                <mat-error>Email non valida</mat-error>
+            }
+        </mat-form-field>
+
+        <mat-form-field class="w-full mb-6" appearance="outline">
+            <mat-label>Password</mat-label>
+            <input
+                matInput
+                formControlName="password"
+                [type]="passwordVisible() ? 'text' : 'password'"
+                placeholder="Inserisci la tua password"
+            />
+            <mat-icon matPrefix class="mr-2 text-gray-400">lock</mat-icon>
+            
+            <button
+                matSuffix
+                mat-icon-button
+                type="button"
+                (click)="passwordVisible.set(!passwordVisible())"
+                aria-label="Toggle password visibility"
+            >
+                <mat-icon>{{ passwordVisible() ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            
+            @if (signInForm.get('password')?.hasError('required')) {
+                <mat-error>La password è obbligatoria</mat-error>
+            }
+        </mat-form-field>
+
+        <button 
+            type="submit" 
+            mat-flat-button 
+            color="primary" 
+            class="w-full py-6! text-base! rounded-lg!" 
+            [disabled]="signInForm.invalid || isLoading()">
+            
+            @if (isLoading()) {
+                <span class="flex items-center gap-2">
+                    Accesso in corso...
+                </span>
+            } @else {
+                Accedi
+            }
+        </button>
+
+        @if (errorMessage()) {
+        <div class="mt-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-200 flex items-center gap-2 animate-pulse">
+            <mat-icon class="text-sm h-5 w-5 text-red-600!">error</mat-icon>
+            <span>{{ errorMessage() }}</span>
+        </div>
+        }
+    </form>
+    
+    <div class="mt-6 text-center text-sm text-gray-500">
+        Non hai un account? 
+        <a routerLink="/signup" mat-dialog-close class="text-[#bd0404] font-bold hover:underline">Registrati</a>
+    </div>
+</div>

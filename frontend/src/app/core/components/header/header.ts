@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterLink, RouterLinkActive } from '@angular/router';
+import { HeaderActionsComponent } from '../header-actions/header-actions'; 
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [RouterLink, RouterLinkActive, HeaderActionsComponent],
   templateUrl: './header.html',
-  styleUrls: ['./header.css'],
+  styleUrl: './header.css' 
 })
-export class Header {}
+export class HeaderComponent {}

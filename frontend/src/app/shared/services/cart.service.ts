@@ -1,5 +1,5 @@
 import { computed, Injectable, signal } from '@angular/core';
-import { Product, ProductListItem } from '../models/product.model';
+import { Product } from '../models/product.model'; 
 import { CartItem } from '../models/cart.model';
 
 @Injectable({
@@ -7,8 +7,8 @@ import { CartItem } from '../models/cart.model';
 })
 export class CartService {
   cartItems = signal<CartItem[]>([]);
-
-  totalItems = computed(() => this.cartItems().reduce((acc, item) => acc + item.quantity, 0));
+  count = computed(() => this.cartItems().reduce((acc, item) => acc + item.quantity, 0));
+  
   totalPrice = computed(() =>
     this.cartItems().reduce((acc, item) => acc + item.listPrice * item.quantity, 0)
   );
@@ -17,29 +17,26 @@ export class CartService {
     this.loadFromLocal();
   }
 
-  public addToCart(product: Product | ProductListItem, quantity = 1): void { // accetta sia il dettaglio completo che l'item della lista
+  public addToCart(product: Product, quantity = 1): void {
     const currentItems = this.cartItems();
-    const existingItem = currentItems.find((i) => i.productId === product.productId);
+    const existingItem = currentItems.find((i) => i.productId === product.productId); 
 
     if (existingItem) {
       this.updateQuantity(product.productId, existingItem.quantity + quantity);
-      // mex toast.success qty updated
     } else {
       const newItem: CartItem = {
         productId: product.productId,
         name: product.name,
-        listPrice: product.listPrice,
+        listPrice: product.listPrice, 
         quantity: quantity,
-        thumbnailUrl: product.thumbnailUrl,
+        thumbnailUrl: product.thumbnailUrl || '', 
       };
 
       this.cartItems.update((items) => [...items, newItem]);
       this.saveToLocalStorage();
-      // mex toast.success product added to cart
     }
   }
 
-  // aggiorna quantità... creare componente nel carrello con + / -
   public updateQuantity(productId: number, quantity: number): void {
     if (quantity <= 0) {
       this.removeFromCart(productId);
@@ -55,16 +52,18 @@ export class CartService {
   public removeFromCart(productId: number): void {
     this.cartItems.update((items) => items.filter((i) => i.productId !== productId));
     this.saveToLocalStorage();
-    // mex toast.info product removed
   }
 
-  // per pulizia carrello dopo ordine concluso con successo
   public clearCart(): void {
     this.cartItems.set([]);
     localStorage.removeItem('cart');
   }
 
-  // persistenza carrello in localStorage
+  public clearCartOnLogout(): void {
+     this.cartItems.set([]);
+     localStorage.removeItem('cart'); 
+  }
+
   private saveToLocalStorage(): void {
     localStorage.setItem('cart', JSON.stringify(this.cartItems()));
   }

@@ -26,6 +26,7 @@ export interface AuthResponse {
   token: string;
   username: string;
   role: string;
+  email: string;
 }
 
 // GET api/auth/me (UserMeDto)
