@@ -1,7 +1,7 @@
-<mat-sidenav-container autosize class="h-[calc(100vh-64px)] bg-gray-50">
+<mat-sidenav-container autosize class="min-h-[calc(100vh-64px)] bg-gray-50">
     
     <mat-sidenav mode="side" opened 
-        class="allow-overflow border-r border-gray-200 bg-white shadow-sm transition-all duration-300 ease-in-out !overflow-visible relative"
+        class="border-r border-gray-200 bg-white shadow-sm !overflow-visible relative sticky top-[80px] h-[calc(100vh-80px)]"
         style="view-transition-name: main-sidebar;" 
         [class]="isSidebarCollapsed() ? '!w-10' : '!w-72'">
         
@@ -12,7 +12,7 @@
 
     </mat-sidenav>
 
-    <mat-sidenav-content class="bg-gray-50 p-8 h-full">
+    <mat-sidenav-content class="bg-gray-50 p-8  !overflow-visible">
         
         <div class="flex justify-between items-end mb-8 border-b border-gray-200 pb-4">
             <div>

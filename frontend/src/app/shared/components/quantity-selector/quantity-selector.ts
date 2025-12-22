@@ -8,19 +8,33 @@ import { MatButtonModule } from '@angular/material/button';
   imports: [MatIconModule, MatButtonModule],
   template: `
     <div class="flex items-center border border-gray-300 rounded-md">
-      <button mat-icon-button (click)="decrease()" [disabled]="quantity() <= 1" class="w-8! h-8! flex items-center justify-center">
-        <mat-icon class="text-sm!">remove</mat-icon>
+      <button
+        mat-icon-button
+        (click)="decrease()"
+        [disabled]="quantity() <= 1"
+        class="!w-8 !h-8 !p-0 !flex !items-center !justify-center"
+      >
+        <mat-icon class="!text-sm !w-4 !h-4 flex items-center justify-center leading-none"
+          >remove</mat-icon
+        >
       </button>
+
       <span class="w-8 text-center font-medium text-gray-900">{{ quantity() }}</span>
-      <button mat-icon-button (click)="increase()" class="w-8! h-8! flex items-center justify-center">
-        <mat-icon class="text-sm!">add</mat-icon>
+      <button
+        mat-icon-button
+        (click)="increase()"
+        class="!w-8 !h-8 !p-0 !flex !items-center !justify-center"
+      >
+        <mat-icon class="!text-sm !w-4 !h-4 flex items-center justify-center leading-none"
+          >add</mat-icon
+        >
       </button>
     </div>
-  `
+  `,
 })
 export class QuantitySelectorComponent {
-  quantity = input.required<number>(); 
-  quantityChange = output<number>();  
+  quantity = input.required<number>();
+  quantityChange = output<number>();
 
   increase() {
     this.quantityChange.emit(this.quantity() + 1);
