@@ -49,6 +49,15 @@ namespace backend.Controllers
             return Ok(response);
         }
 
+        [HttpGet("check-email")]
+        public async Task<ActionResult<bool>> CheckEmail([FromQuery] string email)
+        {
+            if (string.IsNullOrWhiteSpace(email)) return BadRequest("Email required");
+
+            var isAvailable = await _authService.IsEmailAvailableAsync(email);
+            return Ok(isAvailable);
+        }
+
         [Authorize]
         [HttpGet("me")]
         public IActionResult Me()

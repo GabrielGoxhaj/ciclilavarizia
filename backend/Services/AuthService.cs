@@ -66,6 +66,14 @@ namespace backend.Services
             return user.Id;
         }
 
+        public async Task<bool> IsEmailAvailableAsync(string email)
+        {
+            // True se la email è disponibile
+            // False se esiste già
+            bool exists = await _context.Users.AnyAsync(u => u.Email == email);
+            return !exists;
+        }
+
         public async Task<ApiResponse<AuthResponseDto>> Login(UserLoginDto dto)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);

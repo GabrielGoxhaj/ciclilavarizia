@@ -69,10 +69,15 @@ export class AuthService {
     this.router.navigate(['/']);
   }
 
+  checkEmailAvailability(email: string) {
+    // true se disponibile (non esiste), false se esiste già
+    return this.http.get<boolean>(`${this.baseUrl}/auth/check-email?email=${email}`);
+  }
+
   getMe() {
     return this.http.get<ApiResponse<UserMe>>(`${this.baseUrl}/auth/me`).pipe(
       tap((response) => {
-         // Es: this.currentUser.update(prev => ({...prev, ...response.data}))
+        // Es: this.currentUser.update(prev => ({...prev, ...response.data}))
       })
     );
   }

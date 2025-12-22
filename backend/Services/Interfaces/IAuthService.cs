@@ -7,6 +7,7 @@ namespace backend.Services.Interfaces
     public interface IAuthService
     {
         // Task<ApiResponse<string>> Register(UserRegisterDto dto);
+        Task<bool> IsEmailAvailableAsync(string email);
         Task<int> CreateCredentialsAsync(CustomerRegistrationDto dto);
         Task<ApiResponse<AuthResponseDto>> Login(UserLoginDto dto);
     }

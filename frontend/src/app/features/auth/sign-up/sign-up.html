@@ -1,0 +1,122 @@
+<div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">Create your account</h2>
+        <p class="mt-2 text-center text-sm text-gray-600">
+            Or <a routerLink="/login" class="font-medium text-red-600 hover:text-red-500 cursor-pointer">sign in to your existing account</a>
+        </p>
+    </div>
+
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-xl">
+        <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+            <form [formGroup]="registrationForm" (ngSubmit)="onSubmit()" class="space-y-6">
+                
+                <!-- PERSONAL INFO -->
+                <div formGroupName="personalInfo" class="space-y-4">
+                    <div class="grid grid-cols-1 gap-y-4 gap-x-4 sm:grid-cols-2">
+                        <mat-form-field appearance="outline" class="w-full">
+                            <mat-label>First Name</mat-label>
+                            <input matInput formControlName="firstName" placeholder="John">
+                            <mat-error>Required</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="w-full">
+                            <mat-label>Last Name</mat-label>
+                            <input matInput formControlName="lastName" placeholder="Doe">
+                            <mat-error>Required</mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>Email Address</mat-label>
+                        <input matInput formControlName="email" type="email" placeholder="john@example.com">
+                        <mat-error *ngIf="personalInfo.get('email')?.hasError('required')">Email required</mat-error>
+                        <mat-error *ngIf="personalInfo.get('email')?.hasError('email')">Invalid email format</mat-error>
+                        <mat-error *ngIf="personalInfo.get('email')?.hasError('emailTaken')">Email already in use</mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>Phone Number (Optional)</mat-label>
+                        <input matInput formControlName="phone" type="tel">
+                        <mat-error>Invalid phone format</mat-error>
+                    </mat-form-field>
+
+                    <div class="grid grid-cols-1 gap-y-4 gap-x-4 sm:grid-cols-2">
+                        <mat-form-field appearance="outline" class="w-full">
+                            <mat-label>Password</mat-label>
+                            <input matInput [type]="passwordVisible() ? 'text' : 'password'" formControlName="password">
+                            <button mat-icon-button matSuffix type="button" (click)="passwordVisible.set(!passwordVisible())">
+                                <mat-icon>{{passwordVisible() ? 'visibility_off' : 'visibility'}}</mat-icon>
+                            </button>
+                            <mat-error>{{ passwordErrorMessage }}</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="w-full">
+                            <mat-label>Confirm Password</mat-label>
+                            <input matInput [type]="passwordVisible() ? 'text' : 'password'" formControlName="confirmPassword">
+                            <mat-error *ngIf="personalInfo.hasError('passwordMismatch')">Passwords do not match</mat-error>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <div class="border-t border-gray-200 my-4"></div>
+
+                <!-- SHIPPING ADDRESS (Optional) -->
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Shipping Address <span class="text-gray-400 text-sm font-normal">(Optional)</span></h3>
+                
+                <div formGroupName="address" class="space-y-4">
+                    <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>Address Line 1</mat-label>
+                        <input matInput formControlName="addressLine1">
+                    </mat-form-field>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <mat-form-field appearance="outline" class="w-full">
+                            <mat-label>City</mat-label>
+                            <input matInput formControlName="city">
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="w-full">
+                            <mat-label>Postal Code</mat-label>
+                            <input matInput formControlName="postalCode">
+                        </mat-form-field>
+                    </div>
+
+                    <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>Country / Region</mat-label>
+                        <input matInput formControlName="countryRegion">
+                    </mat-form-field>
+                    
+                    <mat-error *ngIf="addressGroup.hasError('incompleteGroup') && addressGroup.touched" class="text-sm">
+                        Please fill all address fields if you want to save it.
+                    </mat-error>
+                </div>
+
+                <!-- Error Message Server -->
+                @if (errorMessage()) {
+                    <div class="rounded-md bg-red-50 p-4 border border-red-200">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <mat-icon class="text-red-400 !w-5 !h-5 text-sm">error</mat-icon>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-red-800">{{ errorMessage() }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- Submit -->
+                <div>
+                    <button type="submit" mat-flat-button color="primary" class="w-full !py-6 !text-lg !rounded-lg" 
+                            [disabled]="registrationForm.invalid || isLoading()">
+                        @if(isLoading()) {
+                            <span class="flex items-center gap-2">Creating account...</span>
+                        } @else {
+                            Create Account
+                        }
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

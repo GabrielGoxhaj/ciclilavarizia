@@ -14,6 +14,13 @@ export const routes: Routes = [
         (m) => m.ProductDetailComponent
       ),
   },
+    {
+    path: 'signup',
+    loadComponent: () =>
+      import('./features/auth/sign-up/sign-up').then(
+        (m) => m.SignUpComponent
+      ),
+  },
   {
     path: 'cart',
     loadComponent: () => import('./features/cart/my-cart/my-cart'), // o MyCartComponent
