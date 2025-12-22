@@ -231,7 +231,7 @@ body {
   margin: 0.25rem 0;
 }
 
-button {
+/* button {
   background: #1976d2;
   color: #fff;
   border: none;
@@ -243,7 +243,7 @@ button {
 
 button:hover {
   background: #1565c0;
-}
+} */
 
 .product-detail {
   background: #fff;

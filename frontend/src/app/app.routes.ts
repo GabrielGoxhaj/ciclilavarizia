@@ -2,15 +2,22 @@ import { Routes } from '@angular/router';
 
 export const routes: Routes = [
   { path: '', loadComponent: () => import('./pages/home/home').then((m) => m.HomeComponent) },
+  { path: 'products', redirectTo: 'products/category/all', pathMatch: 'full' },
   {
-    path: 'products',
-    loadComponent: () => import('./pages/products/products').then((m) => m.ProductsComponent),
+    path: 'products/category/:productCategoryId',
+    loadComponent: () => import('./features/products/product-list/product-list'),
   },
   {
-    path: 'products/:id',
+    path: 'products/:productId',
     loadComponent: () =>
-      import('./pages/product-detail/product-detail').then((m) => m.ProductDetailComponent),
-  },  
+      import('./features/products/product-detail/product-detail').then(
+        (m) => m.ProductDetailComponent
+      ),
+  },
+  {
+    path: 'cart',
+    loadComponent: () => import('./features/cart/my-cart/my-cart'), // o MyCartComponent
+  },
   {
     path: 'about',
     loadComponent: () => import('./pages/about/about').then((m) => m.AboutComponent),

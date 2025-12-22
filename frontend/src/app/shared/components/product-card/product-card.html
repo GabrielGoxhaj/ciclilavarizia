@@ -1,1 +1,30 @@
-<p>product-card works!</p>
+<div class="relative bg-white cursor-pointer rounded-xl shadow-lg overflow-hidden flex flex-col h-full transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-xl"
+    [routerLink]="['/products', product().productId]">
+    <img [src]="imageUrl()" class="w-full h-[300px] object-cover"
+        [style.view-transition-name]="'product-image-' + product().productId">
+    <!-- <img src="https://placehold.co/300x300" class="w-full h-[300px] object-cover rounded-t-xl"> -->
+    <ng-content />
+
+    <div class="p-5 flex flex-col flex-1">
+        <h3 class="text-lg font-semibold text-gray-900 mb-2 leading-tight">{{product().name}}</h3>
+        <div class="relative group">
+            <p class="text-sm text-gray-600 mb-4 leading-relaxed line-clamp-3">
+                {{product().description}}
+            </p>
+        </div>
+
+        <!-- rating?! -->
+        <div class="text-sm font-medium mb-4">
+            {{ product().isAvailable ? 'In Stock' : 'Out of Stock' }}
+        </div>
+
+        <div class="flex items-center justify-between mt-auto gap-2">
+            <span class="text-xl font-bold text-gray-900">{{product().listPrice | currency:'USD'}}</span>
+            <button mat-flat-button class="shadow-sm! hover:shadow-md!" [disabled]="!product().isAvailable"
+                (click)="$event.stopPropagation(); cartService.addToCart(product(), 1)">
+                Acquista
+                <mat-icon>shopping_cart</mat-icon>
+            </button>
+        </div>
+    </div>
+</div>
