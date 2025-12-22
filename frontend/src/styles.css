@@ -42,6 +42,37 @@
     @apply mt-4 text-base sm:text-lg lg:text-xl font-normal opacity-85 text-center mx-auto;
   }
 
+  /* smaller hero variant for legal/footer pages */
+  .page-hero--sm {
+    @apply py-8 mb-6 rounded-lg shadow-sm;
+  }
+
+  .page-hero--sm .titolo {
+    @apply text-2xl sm:text-3xl font-bold;
+  }
+
+  .page-hero--sm .sottotitolo {
+    @apply text-base opacity-90;
+  }
+
+  /* Section card look and alternating background */
+  .page-content > section {
+    @apply py-8 px-6 rounded-xl;
+  }
+
+  .page-content > section + section {
+    @apply mt-6;
+  }
+
+  .page-content > section:nth-child(odd) {
+    background-color: #f9fafb; /* gray-50 */
+  }
+
+  /* Link defaults inside page content */
+  .page-content a {
+    @apply text-[var(--brand-accent)] hover:text-[var(--brand-red-dark)] hover:underline transition-colors duration-200;
+  }
+
 } 
 
 html, body {
