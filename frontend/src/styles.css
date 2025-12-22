@@ -3,11 +3,12 @@
 /* You can add global styles to this file, and also import other style files */
 
 :root {
-  --brand-red: #c53030; /* primary brand red (refined) */
-  --brand-red-2: #e53e3e; /* lighter variant for gradients */
-  --brand-red-dark: #991b1b; /* darker/hover variant */
-  --brand-accent: #bd0404; /* accent close to original */
-}
+  --brand-red: #00970d; /* primary brand red (refined) */
+  --brand-red-2: #023a00; /* lighter variant for gradients */
+  --brand-red-dark: #027202; /* darker/hover variant */
+  --brand-accent: #015806; /* accent close to original */
+  --brand-red-muted: #03920a; /* slightly desaturated red for banners */
+} 
 
 @layer components {
   .page-container {
@@ -15,7 +16,8 @@
   }
 
   .page-hero {
-    @apply text-center mb-12 py-16 bg-gradient-to-br from-[var(--brand-red)] to-[var(--brand-red-dark)] text-white rounded-xl shadow-lg;
+    @apply text-center mb-8 py-10 bg-gradient-to-br from-[var(--brand-red-muted)] to-[var(--brand-red-dark)] text-white rounded-lg shadow-sm;
+    filter: saturate(.95);
   }
 
   .page-content {
@@ -57,7 +59,7 @@
 
   /* Section card look and alternating background */
   .page-content > section {
-    @apply py-8 px-6 rounded-xl;
+    @apply py-10 px-8 rounded-2xl bg-white shadow-sm transition-all duration-300 transform-gpu hover:shadow-md;
   }
 
   .page-content > section + section {
@@ -65,7 +67,69 @@
   }
 
   .page-content > section:nth-child(odd) {
-    background-color: #f9fafb; /* gray-50 */
+    background-color: #ffffff;
+  }
+
+  /* Breadcrumb in hero */
+  .page-hero .breadcrumb {
+    @apply text-sm text-white/80 mt-2 mb-2;
+  }
+
+  /* Breadcrumb in content (if used) */
+  .breadcrumb {
+    @apply text-sm text-gray-500 mt-2 mb-2;
+  }
+
+  .last-updated {
+    @apply text-sm text-gray-500 mt-2;
+  }
+
+  .email-link {
+    @apply inline-flex items-center gap-2 text-[var(--brand-accent)] hover:text-[var(--brand-red-dark)] transition-colors duration-200;
+  }
+
+  .email-link svg {
+    @apply w-4 h-4;
+  }
+
+  /* Fade-in helper (non-blocking without JS) */
+  .fade-in {
+    opacity: 1;
+    transform: none;
+    transition: opacity .5s ease, transform .5s ease;
+  }
+
+  /* Footer improvements */
+  .app-footer {
+    @apply bg-gray-900 text-gray-200 py-6 px-6;
+  }
+
+  .app-footer .container {
+    @apply flex flex-col md:flex-row justify-between items-center gap-4;
+  }
+
+  .app-footer a {
+    @apply text-gray-200 hover:text-white transition-colors;
+  }
+
+  /* Limit paragraph width for readability */
+  .page-content p {
+    @apply text-gray-700 leading-[1.7] max-w-prose mx-auto;
+  }
+
+  /* Mobile tweaks */
+  @media (max-width: 768px) {
+    .page-hero {
+      @apply py-8;
+    }
+
+    .page-content > section {
+      @apply px-4 py-6;
+    }
+
+    .titolo {
+      @apply text-2xl;
+    }
   }
 
   /* Link defaults inside page content */
@@ -198,16 +262,28 @@ body {
 }
 
 .app-footer {
-  background: #333;
-  color: #fff;
-  text-align: center;
-  padding: 1rem;
+  background: #111827; /* gray-900 */
+  color: #e5e7eb; /* gray-200 */
+  text-align: left;
+  padding: 1.5rem 1rem;
 }
 
 .app-footer .container {
   max-width: 1200px;
   margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
 }
+
+.app-footer a {
+  color: #e5e7eb;
+}
+
+.app-footer a:hover {
+  color: #fff;
+} 
 
 /* Page specific styles */
 .container {
