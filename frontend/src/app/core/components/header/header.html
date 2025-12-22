@@ -1,10 +1,22 @@
-<header class="sticky top-0 z-50 w-full shadow-lg bg-linear-to-br from-[#fd1534] to-[#bd0404] text-white">
-  
+<header
+  class="sticky top-0 z-50 w-full shadow-lg bg-linear-to-br from-[var(--brand-red)] to-[var(--brand-red-dark)] text-white"
+>
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between h-16">
-
-      <a routerLink="/" class="flex items-center gap-2 group hover:opacity-90 transition-opacity no-underline text-white">
-        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="group-hover:scale-110 transition-transform">
+      <a
+        routerLink="/"
+        class="flex items-center gap-2 group hover:opacity-90 transition-opacity no-underline text-white"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="28"
+          height="28"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          class="group-hover:scale-110 transition-transform"
+        >
           <circle cx="18.5" cy="17.5" r="3.5"></circle>
           <circle cx="5.5" cy="17.5" r="3.5"></circle>
           <path d="M12 3v4m5-2h4m-8-2H4"></path>
@@ -13,26 +25,34 @@
       </a>
 
       <nav class="hidden md:flex items-center gap-8">
-        <a routerLink="/" 
-           routerLinkActive="font-bold border-b-2 border-white" 
-           [routerLinkActiveOptions]="{exact: true}"
-           class="text-base font-medium hover:opacity-80 transition-all border-b-2 border-transparent py-1">
-           Home
+        <a
+          routerLink="/"
+          routerLinkActive="font-bold border-b-2 border-white"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="text-base font-medium hover:opacity-80 transition-all border-b-2 border-transparent py-1"
+        >
+          Home
         </a>
-        <a routerLink="/products" 
-           routerLinkActive="font-bold border-b-2 border-white" 
-           class="text-base font-medium hover:opacity-80 transition-all border-b-2 border-transparent py-1">
-           Prodotti
+        <a
+          routerLink="/products"
+          routerLinkActive="font-bold border-b-2 border-white"
+          class="text-base font-medium hover:opacity-80 transition-all border-b-2 border-transparent py-1"
+        >
+          Prodotti
         </a>
-        <a routerLink="/about" 
-           routerLinkActive="font-bold border-b-2 border-white" 
-           class="text-base font-medium hover:opacity-80 transition-all border-b-2 border-transparent py-1">
-           Chi siamo
+        <a
+          routerLink="/about"
+          routerLinkActive="font-bold border-b-2 border-white"
+          class="text-base font-medium hover:opacity-80 transition-all border-b-2 border-transparent py-1"
+        >
+          Chi siamo
         </a>
-        <a routerLink="/contact" 
-           routerLinkActive="font-bold border-b-2 border-white" 
-           class="text-base font-medium hover:opacity-80 transition-all border-b-2 border-transparent py-1">
-           Contatti
+        <a
+          routerLink="/contact"
+          routerLinkActive="font-bold border-b-2 border-white"
+          class="text-base font-medium hover:opacity-80 transition-all border-b-2 border-transparent py-1"
+        >
+          Contatti
         </a>
       </nav>
 
