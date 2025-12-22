@@ -15,27 +15,31 @@
   }
 
   .page-hero {
-    @apply text-center mb-8 py-8 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg;
+    @apply text-center mb-12 py-16 bg-gradient-to-br from-[var(--brand-red)] to-[var(--brand-red-dark)] text-white rounded-xl shadow-lg;
   }
 
   .page-content {
-    @apply space-y-6 max-w-4xl mx-auto text-gray-700;
+    @apply space-y-12 max-w-[1150px] mx-auto text-gray-700 leading-relaxed;
   }
 
   .page-content h1 {
     @apply text-2xl sm:text-3xl font-semibold mb-4 text-gray-900;
   }
 
+  .page-content h2 {
+    @apply text-2xl font-bold mb-6 text-gray-900;
+  }
+
   .page-content p {
-    @apply text-gray-700;
+    @apply text-gray-700 leading-[1.7];
   }
 
   .titolo {
-    @apply text-2xl sm:text-3xl font-extrabold;
+    @apply text-3xl sm:text-4xl lg:text-5xl font-bold;
   }
 
   .sottotitolo {
-    @apply mt-3 text-base sm:text-lg opacity-90 text-center;
+    @apply mt-4 text-base sm:text-lg lg:text-xl font-normal opacity-85 text-center mx-auto;
   }
 
 } 
