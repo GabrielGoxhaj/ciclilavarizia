@@ -1,78 +1,71 @@
-<mat-sidenav-container autosize class="min-h-[calc(100vh-64px)] bg-gray-50">
-    
-    <mat-sidenav mode="side" opened 
-        class="border-r border-gray-200 bg-white shadow-sm !overflow-visible relative sticky top-[80px] h-[calc(100vh-80px)]"
-        style="view-transition-name: main-sidebar;" 
-        [class]="isSidebarCollapsed() ? '!w-10' : '!w-72'">
-        
-        <app-category-sidebar 
-            [activeCategory]="currentCategoryValue()"
-            (collapsedChange)="onSidebarToggle($event)">
+<mat-sidenav-container autosize class="min-h-[calc(100vh-64px)] w-full !overflow-x-hidden bg-gray-50">
+        <mat-sidenav mode="side" opened
+        class="border-r border-gray-200 bg-white shadow-sm !overflow-visible relative h-auto min-h-full z-20"
+        style="view-transition-name: main-sidebar;" [class]="isSidebarCollapsed() ? '!w-10' : '!w-72'">
+
+        <app-category-sidebar [activeCategory]="currentCategoryValue()" (collapsedChange)="onSidebarToggle($event)">
         </app-category-sidebar>
 
     </mat-sidenav>
 
     <mat-sidenav-content class="bg-gray-50 p-8  !overflow-visible">
-        
+
         <div class="flex justify-between items-end mb-8 border-b border-gray-200 pb-4">
             <div>
                 <h1 class="text-3xl font-bold text-gray-900 capitalize tracking-tight flex items-center min-h-[40px]">
                     @if (currentCategoryValue() === 'all') {
-                        All Products
+                    All Products
                     } @else {
-                        {{categoryName()}}
+                    {{categoryName()}}
                     }
                 </h1>
                 <p class="text-gray-500 mt-1 text-sm font-medium">
                     @if (isLoading()) {
-                        Checking availability...
+                    Checking availability...
                     } @else {
-                        <span class="text-red-600 font-bold">{{ totalItems() }}</span> products found
+                    <span class="text-red-600 font-bold">{{ totalItems() }}</span> products found
                     }
                 </p>
             </div>
-            
+
             <!-- Search Bar o Sort Dropdown in futuro -->
         </div>
 
         @if (isLoading()) {
-            <div class="flex justify-center py-20">
-                <mat-spinner diameter="40" color="warn"></mat-spinner>
-            </div>
+        <div class="flex justify-center py-20">
+            <mat-spinner diameter="40" color="warn"></mat-spinner>
+        </div>
         }
 
         @if (!isLoading()) {
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 border-b border-gray-200 pb-8">
-                @for (product of products(); track product.productId) {
-                    <app-product-card [product]="product">
-                    
-                    </app-product-card>
-                }
-            </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 border-b border-gray-200 pb-8">
+            @for (product of products(); track product.productId) {
+            <app-product-card [product]="product">
+
+            </app-product-card>
+            }
+        </div>
         }
 
         <!-- Paginator -->
         @if (totalItems() > 0) {
-            <div class="mt-4">
-                <app-paginator 
-                    [length]="totalItems()" 
-                    [pageSize]="pageSize()" 
-                    [pageIndex]="currentPage()"
-                    (pageChange)="onPageChange($event)">
-                </app-paginator>
-            </div>
+        <div class="mt-4">
+            <app-paginator [length]="totalItems()" [pageSize]="pageSize()" [pageIndex]="currentPage()"
+                (pageChange)="onPageChange($event)">
+            </app-paginator>
+        </div>
         }
 
         <!-- Empty State -->
         @if (!isLoading() && products().length === 0) {
-            <div class="text-center py-10 flex flex-col items-center">
-                <mat-icon class="text-gray-300 text-6xl mb-4 !w-16 !h-16">search_off</mat-icon>
-                <h3 class="text-lg font-medium text-gray-600">No products found</h3>
-                <p class="text-gray-400">Try changing category or filters.</p>
-                <a routerLink="/products/category/all" class="mt-4 text-red-600 font-medium hover:underline cursor-pointer">
-                    View all products
-                </a>
-            </div>
+        <div class="text-center py-10 flex flex-col items-center">
+            <mat-icon class="text-gray-300 text-6xl mb-4 !w-16 !h-16">search_off</mat-icon>
+            <h3 class="text-lg font-medium text-gray-600">No products found</h3>
+            <p class="text-gray-400">Try changing category or filters.</p>
+            <a routerLink="/products/category/all" class="mt-4 text-red-600 font-medium hover:underline cursor-pointer">
+                View all products
+            </a>
+        </div>
         }
 
     </mat-sidenav-content>
