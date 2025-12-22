@@ -2,17 +2,24 @@
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
 /* You can add global styles to this file, and also import other style files */
 
+:root {
+  --brand-red: #c53030; /* primary brand red (refined) */
+  --brand-red-2: #e53e3e; /* lighter variant for gradients */
+  --brand-red-dark: #991b1b; /* darker/hover variant */
+  --brand-accent: #bd0404; /* accent close to original */
+}
+
 @layer components {
   .page-container {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12;
   }
 
   .page-hero {
-    @apply text-center mb-12 py-12 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg;
+    @apply text-center mb-8 py-8 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg;
   }
 
   .page-content {
-    @apply space-y-8 max-w-4xl mx-auto text-gray-700;
+    @apply space-y-6 max-w-4xl mx-auto text-gray-700;
   }
 
   .page-content h1 {
@@ -24,11 +31,11 @@
   }
 
   .titolo {
-    @apply text-3xl sm:text-4xl font-extrabold;
+    @apply text-2xl sm:text-3xl font-extrabold;
   }
 
   .sottotitolo {
-    @apply mt-4 text-lg sm:text-xl opacity-90 mx-auto text-center;
+    @apply mt-3 text-base sm:text-lg opacity-90 text-center;
   }
 
 } 
