@@ -4,8 +4,6 @@ using backend.DTOs.Response;
 using backend.Models;
 using backend.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
-using System.Security.Claims;
 using AuthLibrary.Security;
 using backend.DTOs.Customers;
 
@@ -90,6 +88,7 @@ namespace backend.Services
                 { 
                     Token = token, 
                     Username = user.Username,
+                    Email = user.Email,
                     Role = user.Role
                 },
                 "Login successful"
