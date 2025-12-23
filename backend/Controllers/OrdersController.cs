@@ -1,4 +1,5 @@
 ﻿using backend.DTOs.Orders;
+using backend.DTOs.Response;
 using backend.Services;
 using backend.Services.Interfaces;
 using Humanizer;
@@ -33,7 +34,7 @@ namespace backend.Controllers
             var customerId = await _customerService.GetCustomerIdBySecurityIdAsync(securityUserId);
 
             var order = await _commandService.CreateOrderAsync(dto, customerId);
-            return Ok(order);
+            return Ok(ApiResponse<OrderDto>.Success(order, "Order created successfully"));
         }
 
         // GET MY ORDERS (USER)
