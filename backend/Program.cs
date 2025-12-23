@@ -46,6 +46,7 @@ namespace backend
             builder.Services.AddScoped<ICustomerService, CustomerService>();
             builder.Services.AddScoped<IProductService, ProductService>();
             builder.Services.AddScoped<IOrderCommandService, OrderService>();
+            builder.Services.AddScoped<IOrderQueryService, OrderService>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
             builder.Services.AddScoped<IAccountManager, AccountManager>();
 
@@ -61,6 +62,29 @@ namespace backend
                                   });
             });
 
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+
+                    // Nomi corretti basati sul tuo appsettings.json ("Jwt" non "JwtSettings")
+                    ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                    ValidAudience = builder.Configuration["Jwt:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)
+                    )
+                };
+            });
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -73,10 +97,12 @@ namespace backend
             app.UseCors("CorsPolicy");
 
             app.UseHttpsRedirection();
+
+            app.UseStaticFiles(); // abilita file statici per leggere cartella wwwroot
+
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseStaticFiles(); // abilita file statici per leggere cartella wwwroot
             app.MapControllers();
 
             app.Run();

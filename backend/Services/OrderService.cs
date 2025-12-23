@@ -58,6 +58,7 @@ namespace backend.Services
                 {
                     CustomerId = customerId,
                     OrderDate = DateTime.UtcNow,
+                    DueDate = DateTime.UtcNow.AddDays(7),
                     Status = 1,
                     ShipMethod = "CARGO TRANSPORT 7",
                     ShipToAddressId = dto.AddressId,
