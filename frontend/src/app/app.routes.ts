@@ -23,7 +23,15 @@ export const routes: Routes = [
   },
   {
     path: 'cart',
-    loadComponent: () => import('./features/cart/my-cart/my-cart'), // o MyCartComponent
+    loadComponent: () => import('./features/cart/my-cart/my-cart'),
+  },
+  {
+    path: 'checkout',
+    loadComponent: () => import('./features/orders/checkout/checkout'),
+  },
+  {
+    path: 'order-success/:id',
+    loadComponent: () => import('./pages/order-success/order-success'),
   },
   {
     path: 'about',

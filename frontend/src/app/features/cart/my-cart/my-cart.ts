@@ -1,14 +1,14 @@
 import { Component, inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router'; // <--- Import Router
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { ListCartItems } from '../list-cart-items/list-cart-items';
 import { OrderSummary } from '../../../shared/components/order-summary/order-summary';
 import { BackButton } from '../../../shared/components/back-button/back-button';
+import { MatDialog } from '@angular/material/dialog';
 import { CartService } from '../../../shared/services/cart.service';
 import { AuthService } from '../../../shared/services/auth.service';
-import { MatDialog } from '@angular/material/dialog';
-import { LoginComponent } from '../../../core/components/login/login'; // Assicurati del nome corretto
+import { LoginComponent } from '../../../core/components/login/login';
 
 @Component({
   selector: 'app-my-cart',
@@ -27,23 +27,22 @@ export default class MyCartComponent {
   cartService = inject(CartService);
   private authService = inject(AuthService);
   private dialog = inject(MatDialog);
+  private router = inject(Router); // <--- Inject Router
 
   proceedToCheckout() {
+    // Verifica se l'utente è loggato (isLoggedIn è un Signal, quindi usa le parentesi)
     if (this.authService.isLoggedIn()) {
-      console.log('User is logged in -> Proceeding to checkout (Not implemented)');
-      alert('Checkout page coming soon!');
+      this.router.navigate(['/checkout']);
     } else {
-      console.log('User not logged in -> Opening Login Dialog');
-      
-      // Apre il modal di login che abbiamo creato in precedenza
+      // Apre il modal di login
       const dialogRef = this.dialog.open(LoginComponent, {
         width: '400px'
       });
 
-      // Dopo il login, se ha successo...
+      // Dopo la chiusura del login, se è andato a buon fine, vai al checkout
       dialogRef.afterClosed().subscribe(result => {
         if (result === true) {
-            console.log('Login success -> Now can proceed');
+            this.router.navigate(['/checkout']);
         }
       });
     }

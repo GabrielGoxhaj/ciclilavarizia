@@ -4,6 +4,8 @@ export interface CreateOrderDetail {
 }
 
 export interface CreateOrderRequest {
+  addressId: number; 
+  paymentMethod?: string; 
   items: CreateOrderDetail[];
 }
 
@@ -16,10 +18,12 @@ export interface OrderDetail {
   lineTotal: number;
 }
 
+// response
 export interface Order {
-  salesOrderId: number;
+  salesOrderId: number; 
   customerId: number;
   orderDate: string;
+  status: number;
   subTotal: number;
   taxAmt: number;
   freight: number;

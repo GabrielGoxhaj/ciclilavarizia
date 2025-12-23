@@ -3,7 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ApiResponse } from '../models/api-response.model';
-import { Address } from '../models/address.model';
+import { Address, CreateAddressRequest } from '../models/address.model';
 import { Customer, CustomerCreateRequest, CustomerUpdateRequest } from '../models/customer.model';
 
 @Injectable({
@@ -17,6 +17,11 @@ export class CustomerService {
   // GET: api/Customers/my-addresses
   getMyAddresses(): Observable<ApiResponse<Address[]>> {
     return this.http.get<ApiResponse<Address[]>>(`${this.baseUrl}/my-addresses`);
+  }
+
+  createAddress(address: CreateAddressRequest): Observable<ApiResponse<Address>> {
+    // Nota: baseUrl include già /customers, quindi aggiungiamo solo /addresses
+    return this.http.post<ApiResponse<Address>>(`${this.baseUrl}/addresses`, address);
   }
 
   // admin:
