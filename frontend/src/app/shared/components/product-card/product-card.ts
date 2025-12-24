@@ -16,24 +16,20 @@ import { environment } from '../../../../environments/environment';
 })
 export class ProductCard {
     cartService = inject(CartService);
-
     product = input.required<ProductListItem>();
-
+    private backendHost = environment.apiUrl.replace('/api', '');
     imageUrl = computed(() => {
-    const url = this.product().thumbnailUrl;
+        const url = this.product().thumbnailUrl;
+        if (!url) return `${this.backendHost}/images/products/placehold.webp`; 
+        
+        return `${this.backendHost}${url}`;
+    });
 
-    // 1. Se non c'è URL, usa un placeholder locale di fallback
-    // if (!url) return 'assets/images/placeholder.webp';
-
-    // 2. Se l'URL è già assoluto (inizia con http), usalo così com'è
-    // if (url.startsWith('http')) return url;
-
-    // 3. Se l'URL è relativo (es. /images/products/...), dobbiamo aggiungere il dominio del backend.
-    // environment.apiUrl è solitamente "https://localhost:7061/api"
-    // Noi vogliamo ottenere solo "https://localhost:7061"
-    const backendHost = environment.apiUrl.replace('/api', '');
-
-    // Restituisce es: https://localhost:7061/images/products/placehold.webp
-    return `${backendHost}${url}`;
-  });
+    handleMissingImage(event: Event) { // chiamata quando l'immagine dà errore 404
+        const imgElement = event.target as HTMLImageElement;
+        const fallbackUrl = `${this.backendHost}/images/products/placehold.webp`;
+        if (imgElement.src !== fallbackUrl) {
+            imgElement.src = fallbackUrl;
+        }
+    }
 }

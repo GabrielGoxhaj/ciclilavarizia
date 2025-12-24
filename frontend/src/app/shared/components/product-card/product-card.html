@@ -1,8 +1,7 @@
 <div class="relative bg-white cursor-pointer rounded-xl shadow-lg overflow-hidden flex flex-col h-full transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-xl"
     [routerLink]="['/products', product().productId]">
-    <img [src]="imageUrl()" class="w-full h-[300px] object-cover"
+    <img [src]="imageUrl()" class="w-full h-75 object-cover" alt="{{ product().name }}" (error)="handleMissingImage($event)"
         [style.view-transition-name]="'product-image-' + product().productId">
-    <!-- <img src="https://placehold.co/300x300" class="w-full h-[300px] object-cover rounded-t-xl"> -->
     <ng-content />
 
     <div class="p-5 flex flex-col flex-1">
@@ -12,8 +11,6 @@
                 {{product().description}}
             </p>
         </div>
-
-        <!-- rating?! -->
         <div class="text-sm font-medium mb-4">
             {{ product().isAvailable ? 'In Stock' : 'Out of Stock' }}
         </div>
