@@ -1,14 +1,16 @@
-import { computed, Injectable, signal } from '@angular/core';
-import { Product, ProductListItem } from '../models/product.model'; 
+import { computed, inject, Injectable, signal } from '@angular/core';
+import { Product, ProductListItem } from '../models/product.model';
 import { CartItem } from '../models/cart.model';
+import { ToastService } from './toast.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CartService {
+  private toastService = inject(ToastService);
   cartItems = signal<CartItem[]>([]);
   count = computed(() => this.cartItems().reduce((acc, item) => acc + item.quantity, 0));
-  
+
   totalPrice = computed(() =>
     this.cartItems().reduce((acc, item) => acc + item.listPrice * item.quantity, 0)
   );
@@ -19,21 +21,23 @@ export class CartService {
 
   public addToCart(product: Product | ProductListItem, quantity = 1): void {
     const currentItems = this.cartItems();
-    const existingItem = currentItems.find((i) => i.productId === product.productId); 
+    const existingItem = currentItems.find((i) => i.productId === product.productId);
 
     if (existingItem) {
       this.updateQuantity(product.productId, existingItem.quantity + quantity);
+      this.toastService.info(`Quantità aggiornata: ${product.name}`);
     } else {
       const newItem: CartItem = {
         productId: product.productId,
         name: product.name,
-        listPrice: product.listPrice, 
+        listPrice: product.listPrice,
         quantity: quantity,
-        thumbnailUrl: product.thumbnailUrl || '', 
+        thumbnailUrl: product.thumbnailUrl || '',
       };
 
       this.cartItems.update((items) => [...items, newItem]);
       this.saveToLocalStorage();
+      this.toastService.success(`${product.name} aggiunto al carrello`);
     }
   }
 
@@ -60,8 +64,8 @@ export class CartService {
   }
 
   public clearCartOnLogout(): void {
-     this.cartItems.set([]);
-     localStorage.removeItem('cart'); 
+    this.cartItems.set([]);
+    localStorage.removeItem('cart');
   }
 
   private saveToLocalStorage(): void {

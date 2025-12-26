@@ -7,14 +7,14 @@ import { MatButtonModule } from '@angular/material/button';
   standalone: true,
   imports: [MatIconModule, MatButtonModule],
   template: `
-    <div class="flex items-center border border-gray-300 rounded-md">
+    <div class="flex items-center ">
       <button
         mat-icon-button
         (click)="decrease()"
         [disabled]="quantity() <= 1"
-        class="!w-8 !h-8 !p-0 !flex !items-center !justify-center"
+        class="w-8 h-8 p-0 flex items-center justify-center"
       >
-        <mat-icon class="!text-sm !w-4 !h-4 flex items-center justify-center leading-none"
+        <mat-icon class="text-sm w-4 h-4 flex items-center justify-center leading-none"
           >remove</mat-icon
         >
       </button>
@@ -23,9 +23,9 @@ import { MatButtonModule } from '@angular/material/button';
       <button
         mat-icon-button
         (click)="increase()"
-        class="!w-8 !h-8 !p-0 !flex !items-center !justify-center"
+        class="w-8 h-8 p-0 flex items-center justify-center"
       >
-        <mat-icon class="!text-sm !w-4 !h-4 flex items-center justify-center leading-none"
+        <mat-icon class="text-sm w-4 h-4 flex items-center justify-center leading-none"
           >add</mat-icon
         >
       </button>

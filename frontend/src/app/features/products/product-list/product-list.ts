@@ -6,10 +6,11 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { CategorySidebarComponent } from '../../../core/components/sidebar/sidebar';
-import { ProductCard } from '../../../shared/components/product-card/product-card'; 
-import { Paginator, PaginatorState } from '../../../shared/components/paginator/paginator'; 
+import { ProductCard } from '../../../shared/components/product-card/product-card';
+import { Paginator, PaginatorState } from '../../../shared/components/paginator/paginator';
 import { ProductService } from '../../../shared/services/product.service';
 import { ProductListItem, ProductFilter } from '../../../shared/models/product.model';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
 @Component({
   selector: 'app-product-list',
@@ -20,6 +21,7 @@ import { ProductListItem, ProductFilter } from '../../../shared/models/product.m
     MatProgressSpinnerModule,
     MatIconModule,
     MatButtonModule,
+    MatButtonToggleModule,
     CategorySidebarComponent,
     ProductCard,
     Paginator,
@@ -32,6 +34,7 @@ export default class ProductListComponent {
   productCategoryId = input<string>();
   categoryName = signal<string>('');
   currentCategoryValue = computed(() => this.productCategoryId() || 'all');
+  viewMode = signal<'grid' | 'list'>('grid');
 
   products = signal<ProductListItem[]>([]);
   totalItems = signal(0);
@@ -44,7 +47,7 @@ export default class ProductListComponent {
 
   constructor() {
     effect(() => {
-      const catId = this.productCategoryId(); 
+      const catId = this.productCategoryId();
       untracked(() => {
         this.currentPage.set(1); // reset pagina
         this.loadProducts();
@@ -53,26 +56,26 @@ export default class ProductListComponent {
     });
   }
 
-   // funzione per trovare il nome della categoria
+  // funzione per trovare il nome della categoria
   resolveCategoryName(): void {
     const val = this.currentCategoryValue();
-    
+
     if (val === 'all') {
-        this.categoryName.set('All Products');
-        return;
+      this.categoryName.set('All Products');
+      return;
     }
 
     this.productService.getCategories().subscribe({
-        next: (res) => {
-            const categories = res.data || [];
-            const found = categories.find(c => c.productCategoryId.toString() === val);
-            if (found) {
-                this.categoryName.set(found.name);
-            } else {
-                this.categoryName.set('Category Products'); // fallback se non trovato
-            }
-        },
-        error: () => this.categoryName.set('Category Products')
+      next: (res) => {
+        const categories = res.data || [];
+        const found = categories.find((c) => c.productCategoryId.toString() === val);
+        if (found) {
+          this.categoryName.set(found.name);
+        } else {
+          this.categoryName.set('Category Products'); // fallback se non trovato
+        }
+      },
+      error: () => this.categoryName.set('Category Products'),
     });
   }
 
@@ -112,8 +115,9 @@ export default class ProductListComponent {
     this.currentPage.set(event.pageIndex);
     this.pageSize.set(event.pageSize);
     this.loadProducts();
-
-    document.querySelector('mat-sidenav-content')?.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 0);
   }
 
   onSidebarToggle(collapsed: boolean) {

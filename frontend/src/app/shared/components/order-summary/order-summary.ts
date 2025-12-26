@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CartService } from '../../../shared/services/cart.service';
 
@@ -8,31 +8,31 @@ import { CartService } from '../../../shared/services/cart.service';
   imports: [CommonModule],
   template: `
     <div class="border border-gray-200 rounded-xl p-6 bg-white shadow-sm sticky top-24">
-        <h2 class="text-xl font-bold mb-6">Order Summary</h2>
+        <h2 class="text-xl font-bold mb-6">Riepilogo Ordine</h2>
 
         <div class="space-y-4 text-sm text-gray-600">
             <div class="flex justify-between">
-                <span>Subtotal</span>
-                <span class="font-medium text-gray-900">{{ subtotal() | currency:'USD' }}</span>
+                <span>Subtotale</span>
+                <span class="font-medium text-gray-900">{{ subtotal() | currency:'EUR' }}</span>
             </div>    
             <div class="flex justify-between">
-                <span>Shipping</span>
-                <span class="text-green-600 font-medium">Free</span>
+                <span>Spedizione</span>
+                <span>{{ freight() | currency:'EUR' }}</span>
             </div>    
             <div class="flex justify-between">
-                <span>Tax (Estimated)</span>
-                <span>{{ tax() | currency:'USD' }}</span>
+                <span>Tasse</span>
+                <span>{{ tax() | currency:'EUR' }}</span>
             </div>   
             
             <div class="h-px bg-gray-100 my-4"></div>
 
             <div class="flex justify-between items-center text-lg font-bold text-gray-900">
-                <span>Total</span>
-                <span>{{ total() | currency:'USD' }}</span>
+                <span>Totale</span>
+                <span>{{ total() | currency:'EUR' }}</span>
             </div>    
         </div>
 
-        <!-- Proiezione del bottone checkout -->
+        <!-- bottone checkout -->
         <ng-content select="[actionButtons]"></ng-content>
         
         <div class="mt-4 flex items-center justify-center gap-2 text-xs text-gray-400">
@@ -49,8 +49,7 @@ export class OrderSummary {
     this.cartService.cartItems().reduce((acc, item) => acc + (item.listPrice * item.quantity), 0)
   );
   
-  // Esempio logica futura: tasse 10%
-  tax = computed(() => this.subtotal() * 0.1);
-  
-  total = computed(() => this.subtotal() + this.tax());
+  tax = computed(() => this.subtotal() * 0.22);
+  freight = signal<number>(5.00); // Flat rate for demonstration
+  total = computed(() => this.subtotal() + this.tax() + this.freight());
 }

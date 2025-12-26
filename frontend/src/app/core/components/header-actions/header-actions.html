@@ -1,30 +1,14 @@
 <div class="flex items-center gap-2">
-  <button
-    mat-icon-button
-    routerLink="/cart"
-    aria-label="Vai al carrello"
-    class="flex! items-center! justify-center! text-white! hover:bg-white/10"
-  >
-    <mat-icon
-      [matBadge]="cartService.count()"
-      [matBadgeHidden]="cartService.count() === 0"
-      matBadgeColor="accent"
-      class="text-white!"
-    >
-      shopping_cart
-    </mat-icon>
-  </button>
-
+  <a mat-icon-button routerLink="/cart" aria-label="Vai al carrello"
+    class="flex! items-center! justify-center! text-white! hover:bg-white/10">
+    <mat-icon [matBadge]="cartService.count()" [matBadgeHidden]="cartService.count() === 0" 
+      aria-hidden="false" class="text-white!">shopping_cart</mat-icon>
+  </a>
   @if(authService.currentUser(); as user) {
-  <button
-    mat-icon-button
-    [matMenuTriggerFor]="userMenu"
-    aria-label="Menu utente"
-    class="flex items-center justify-center text-white! hover:bg-white/10"
-  >
+  <button mat-icon-button [matMenuTriggerFor]="userMenu" aria-label="Menu utente"
+    class="flex items-center justify-center text-white! hover:bg-white/10">
     <mat-icon class="text-white!">face</mat-icon>
   </button>
-
   <mat-menu #userMenu="matMenu" xPosition="before">
     <div class="flex flex-col px-4 py-2 min-w-50 outline-none">
       <span class="text-sm font-bold text-gray-800">
@@ -32,38 +16,28 @@
       </span>
       <span class="text-xs text-gray-500">{{ user.email }}</span>
     </div>
-
     <mat-divider></mat-divider>
-
     <button mat-menu-item routerLink="/features/orders">
       <mat-icon>list_alt</mat-icon>
       <span>I miei ordini</span>
     </button>
-
     <button mat-menu-item (click)="logout()">
       <mat-icon>logout</mat-icon>
       <span>Esci</span>
     </button>
   </mat-menu>
-
   } @else {
   <div class="flex items-center gap-2">
     <div class="flex items-center gap-2">
-      <button
-        mat-button
-        (click)="openLogin()"
-        class="text-white! font-medium! hover:bg-white/10 rounded-full!"
-      >
+      <button matButton="filled" (click)="openLogin()" aria-label="Accedi al sito">
         Login
       </button>
     </div>
-
-    <a
-      routerLink="/signup"
-      class="bg-white text-[var(--brand-accent)] hover:bg-gray-200 font-bold py-1.5 px-5 rounded-full text-sm transition-all duration-300 hover:scale-[1.03] shadow-md no-underline flex items-center"
-    >
-      Registrati
-    </a>
+    <div class="relative group">
+      <a matButton="elevated" routerLink="/signup" aria-label="Registrati al sito">
+        Registrati
+      </a>
+    </div>
   </div>
   }
 </div>

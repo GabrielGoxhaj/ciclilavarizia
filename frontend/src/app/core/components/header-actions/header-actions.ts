@@ -22,6 +22,7 @@ import { MatDialog } from '@angular/material/dialog';
     MatDividerModule,
   ],
   templateUrl: './header-actions.html',
+  styleUrl: './header-actions.css' 
 })
 export class HeaderActionsComponent {
   cartService = inject(CartService);

@@ -50,7 +50,7 @@
       type="submit"
       mat-flat-button
       color="primary"
-      class="w-full py-6! text-base! rounded-lg!"
+      class="w-full py-6! text-base! "
       [disabled]="signInForm.invalid || isLoading()"
     >
       @if (isLoading()) {
@@ -73,7 +73,7 @@
     <a
       routerLink="/signup"
       mat-dialog-close
-      class="text-[var(--brand-accent)] font-bold hover:underline"
+      class="text-(--mat-sys-primary) font-semibold "
       >Registrati</a
     >
   </div>

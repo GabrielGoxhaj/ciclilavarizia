@@ -1,10 +1,11 @@
 import { Component, input } from '@angular/core';
+import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-back-button',
-  imports: [RouterLink, MatIcon],
+  imports: [RouterLink, MatIcon, MatButton],
   template: `
     <button
       matButton="text"
@@ -22,5 +23,5 @@ import { RouterLink } from '@angular/router';
   `,
 })
 export class BackButton {
-  navigateTo = input<string>();
+  navigateTo = input<string | any[]>();
 }

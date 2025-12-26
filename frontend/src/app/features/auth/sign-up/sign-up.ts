@@ -2,15 +2,11 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule, FormGroup } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
-
-// Material
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-
-// Services & Validators
 import { AuthService } from '../../../shared/services/auth.service';
 import { matchPasswordValidator } from '../../../core/validators/match-password.validator';
 import { passwordStrengthValidator } from '../../../core/validators/password-strength.validator';
@@ -39,24 +35,23 @@ export class SignUpComponent {
   private router = inject(Router);
 
   isLoading = signal(false);
-  passwordVisible = signal(false);
   errorMessage = signal('');
 
   registrationForm = this.fb.group({
     personalInfo: this.fb.group({
         firstName: ['', Validators.required],
         lastName: ['', Validators.required],
+        username: ['', Validators.required], 
         email: [
             '',
             [Validators.required, Validators.email],
             [EmailValidators.createUniqueEmailValidator(this.authService)],
         ],
-        phone: ['', [Validators.pattern(/^\+?[0-9 \-\(\)]*$/), Validators.minLength(7)]],
+        phone: ['', [Validators.pattern(/^\+?[0-9 \-\(\)]*$/), Validators.minLength(7), Validators.maxLength(25)]],
         password: ['', [Validators.required, Validators.minLength(8), passwordStrengthValidator()]],
         confirmPassword: ['', Validators.required],
     }, { validators: matchPasswordValidator('password', 'confirmPassword') }),
     
-    // Address Group (Opzionale)
     address: this.fb.group({
         addressLine1: [''],
         city: [''],
@@ -69,18 +64,17 @@ export class SignUpComponent {
   get personalInfo() { return this.registrationForm.get('personalInfo') as FormGroup; }
   get addressGroup() { return this.registrationForm.get('address') as FormGroup; }
 
-  // Helper per messaggi errore password
   get passwordErrorMessage(): string {
     const control = this.personalInfo.get('password');
-    if (control?.hasError('required')) return 'Password is required';
-    if (control?.hasError('minlength')) return 'Min 8 characters';
+    if (control?.hasError('required')) return 'La password è obbligatoria';
+    if (control?.hasError('minlength')) return 'Minimo 8 caratteri';
     if (control?.hasError('passwordStrength')) {
         const err = control.errors!['passwordStrength'];
         const missing = [];
-        if (!err.hasUpperCase) missing.push('Uppercase');
-        if (!err.hasLowerCase) missing.push('Lowercase');
-        if (!err.hasNumeric) missing.push('Number');
-        return 'Missing: ' + missing.join(', ');
+        if (!err.hasUpperCase) missing.push('Maiuscola');
+        if (!err.hasLowerCase) missing.push('Minuscola');
+        if (!err.hasNumeric) missing.push('Numero');
+        return 'Mancante: ' + missing.join(', ');
     }
     return '';
   }
@@ -98,25 +92,23 @@ export class SignUpComponent {
     const info = formValue.personalInfo!;
     const addr = formValue.address!;
 
-    // Costruzione indirizzi
     const addresses: AddressDto[] = [];
     if (addr.addressLine1?.trim()) {
         addresses.push({
-            addressType: 'Shipping', // Default
+            addressType: 'Shipping',
             addressLine1: addr.addressLine1!,
             city: addr.city!,
-            stateProvince: addr.stateProvince || undefined, // undefined invece di null per l'interfaccia
+            stateProvince: addr.stateProvince || undefined,
             postalCode: addr.postalCode!,
             countryRegion: addr.countryRegion!
         });
     }
 
-    // Costruzione Payload finale
     const payload: CustomerRegistrationRequest = {
         firstName: info.firstName!,
         lastName: info.lastName!,
         email: info.email!,
-        username: info.email!, // Uso la mail come username
+        username: info.username!, 
         password: info.password!,
         phone: info.phone || undefined,
         addresses: addresses.length > 0 ? addresses : undefined
@@ -125,12 +117,11 @@ export class SignUpComponent {
     this.authService.register(payload).subscribe({
         next: (res) => {
             console.log('Registered', res);
-            // Auto Login dopo registrazione
             this.authService.login({ email: payload.email, password: payload.password }).subscribe({
                 next: () => this.router.navigate(['/']),
                 error: () => {
                     this.isLoading.set(false);
-                    this.router.navigate(['/login']); // Fallback se auto-login fallisce
+                    this.router.navigate(['/login']);
                 }
             });
         },

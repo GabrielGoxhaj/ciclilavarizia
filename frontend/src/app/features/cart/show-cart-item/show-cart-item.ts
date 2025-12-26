@@ -1,15 +1,12 @@
 import { Component, computed, inject, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-
-// Material
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-
-// Components & Services
+import { MatTooltipModule } from '@angular/material/tooltip'; 
 import { QuantitySelectorComponent } from '../../../shared/components/quantity-selector/quantity-selector';
 import { CartService } from '../../../shared/services/cart.service';
-import { CartItem } from '../../../shared/models/cart.model'; // Assicurati del percorso
+import { CartItem } from '../../../shared/models/cart.model';
 import { environment } from '../../../../environments/environment';
 
 @Component({
@@ -19,33 +16,35 @@ import { environment } from '../../../../environments/environment';
     CommonModule, 
     RouterLink, 
     MatButtonModule, 
-    MatIconModule, 
+    MatIconModule,
+    MatTooltipModule,
     QuantitySelectorComponent
   ],
   template: `
     <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
         
-        <!-- Immagine -->
+        <!-- img -->
         <a [routerLink]="['/products', item().productId]" class="shrink-0">
             <img
-                [src]="imageUrl()"
+                [src]="imageUrl()" 
+                (error)="handleMissingImage($event)"
                 [alt]="item().name"
                 class="w-24 h-24 rounded-lg object-contain border border-gray-100 bg-gray-50 hover:opacity-90 transition-opacity"
             />
         </a>
 
-        <!-- Info Prodotto -->
+        <!-- product info -->
         <div class="flex-1 min-w-0">
             <a [routerLink]="['/products', item().productId]" 
                class="text-lg font-semibold text-gray-900 hover:text-red-600 transition-colors block truncate">
                 {{ item().name }}
             </a>
             <p class="text-gray-500 text-sm mt-1">
-                Unit Price: {{ item().listPrice | currency:'USD' }}
+                Unit Price: {{ item().listPrice | currency:'EUR' }}
             </p>
         </div>
 
-        <!-- Azioni (Quantità + Delete) -->
+        <!-- actions (qty + delete) -->
         <div class="flex items-center gap-6 mt-2 sm:mt-0">
             
             <app-quantity-selector
@@ -53,15 +52,15 @@ import { environment } from '../../../../environments/environment';
                 (quantityChange)="cartService.updateQuantity(item().productId, $event)"
             />
 
-            <div class="text-right min-w-[80px]">
+            <div class="text-right min-w-20">
                 <div class="font-bold text-lg text-gray-900">
-                    {{ (item().listPrice * item().quantity) | currency:'USD' }}
+                    {{ (item().listPrice * item().quantity) | currency:'EUR' }}
                 </div>
             </div>
 
             <button mat-icon-button color="warn" 
                     (click)="cartService.removeFromCart(item().productId)"
-                    matTooltip="Remove item">
+                    matTooltip="Rimuovi dal carrello">
                 <mat-icon>delete_outline</mat-icon>
             </button>
         </div>
@@ -71,14 +70,21 @@ import { environment } from '../../../../environments/environment';
 export class ShowCartItem {
   cartService = inject(CartService);
   item = input.required<CartItem>();
+  private backendHost = environment.apiUrl.replace('/api', '');
 
   imageUrl = computed(() => {
-    const url = this.item().thumbnailUrl;
-    if (!url) return 'assets/images/placehold.webp';
-    if (url.startsWith('http')) return url;
-    
-    // Aggiunge dominio backend
-    const backendHost = environment.apiUrl.replace('/api', '');
-    return `${backendHost}${url}`;
+      const url = this.item().thumbnailUrl;
+      if (!url) return `${this.backendHost}/images/products/placehold.webp`; 
+      if (url.startsWith('http')) return url;
+
+      return `${this.backendHost}${url}`;
   });
+  handleMissingImage(event: Event) { 
+      const imgElement = event.target as HTMLImageElement;
+      const fallbackUrl = `${this.backendHost}/images/products/placehold.webp`;
+      
+      if (imgElement.src !== fallbackUrl) {
+          imgElement.src = fallbackUrl;
+      }
+  }
 }

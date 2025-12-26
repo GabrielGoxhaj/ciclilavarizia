@@ -1,34 +1,33 @@
-<div class="mx-auto max-w-[1200px] px-4 py-8">
+<div class="mx-auto max-w-300 px-4 py-8">
     <div class="mb-6">
-        <app-back-button [navigateTo]="'/cart'">Back to Cart</app-back-button>
+        <app-back-button [navigateTo]="'/cart'">Torna al carrello</app-back-button>
         <h1 class="text-3xl font-bold mt-4 text-gray-900">Checkout</h1>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        <!-- COLONNA SINISTRA: Form Spedizione e Pagamento -->
+        <!-- left col -->
         <div class="lg:col-span-2">
             <form [formGroup]="checkoutForm">
                 
-                <!-- Riquadro Spedizione -->
+                <!-- shipping -->
                 <div class="border border-gray-200 rounded-xl p-6 bg-white shadow-sm mb-6">
                     <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
                         <mat-icon class="text-red-600">local_shipping</mat-icon>
-                        Delivery Address
+                        Indirizzo di spedizione
                     </h2>
 
-                    <!-- Radio Buttons -->
                     <mat-radio-group [value]="useSavedAddress()" (change)="toggleAddressMode($event.value)" class="flex flex-col gap-4 mb-6">
                         
-                        <!-- Opzione 1: Indirizzo Salvato -->
+                        <!-- saved address -->
                         <mat-radio-button [value]="true" [disabled]="addresses().length === 0" color="primary">
-                            <span class="font-medium text-gray-900">Use a saved address</span>
+                            <span class="font-medium text-gray-900">Usa un indirizzo salvato</span>
                             @if(addresses().length === 0) {
-                                <span class="text-xs text-gray-500 ml-2">(No saved addresses found)</span>
+                                <span class="text-xs text-gray-500 ml-2">(Nessun indirizzo salvato)</span>
                             }
                         </mat-radio-button>
 
-                        <!-- Dropdown Indirizzi Salvati -->
+                        <!-- dropdown saved address -->
                         @if(useSavedAddress()) {
                             <div class="ml-8 mt-2 max-w-md">
                                 <mat-form-field appearance="outline" class="w-full">
@@ -40,18 +39,18 @@
                                             </mat-option>
                                         }
                                     </mat-select>
-                                    <mat-error>Please select an address</mat-error>
+                                    <mat-error>Per favore seleziona un indirizzo</mat-error>
                                 </mat-form-field>
                             </div>
                         }
 
-                        <!-- Opzione 2: Nuovo Indirizzo -->
+                        <!-- new address -->
                         <mat-radio-button [value]="false" color="primary">
-                            <span class="font-medium text-gray-900">Ship to a new address</span>
+                            <span class="font-medium text-gray-900">Spedisci a un nuovo indirizzo</span>
                         </mat-radio-button>
                     </mat-radio-group>
 
-                    <!-- Form Nuovo Indirizzo -->
+                    <!-- form -->
                     @if(!useSavedAddress()) {
                         <div class="ml-8 border-l-2 border-gray-100 pl-4 animate-fade-in">
                             <app-shipping-form [group]="checkoutForm"></app-shipping-form>
@@ -59,46 +58,45 @@
                     }
                 </div>
 
-                <!-- Pagamento -->
                 <app-payment-form></app-payment-form>
 
             </form>
         </div>
 
-        <!-- COLONNA DESTRA: Riepilogo -->
+        <!-- right col -->
         <div class="lg:col-span-1">
             <app-order-summary>
                 
-                <!-- Lista Items (Proiezione) -->
+                <!-- item list -->
                 <ng-container checkoutItems>
-                    <div class="max-h-[300px] overflow-y-auto mb-4 pr-2">
+                    <div class="max-h-75 overflow-y-auto mb-4 pr-2">
                         @for(item of cartService.cartItems(); track item.productId) {
                             <div class="flex justify-between items-center py-3 border-b border-gray-50 text-sm">
                                 <div class="flex items-center gap-2">
                                     <span class="bg-gray-100 px-2 py-0.5 rounded text-xs font-bold text-gray-600">
                                         {{item.quantity}}x
                                     </span>
-                                    <span class="text-gray-700 truncate max-w-[150px]">{{item.name}}</span>
+                                    <span class="text-gray-700 truncate max-w-38">{{item.name}}</span>
                                 </div>
-                                <span class="font-medium">{{item.listPrice * item.quantity | currency:'USD'}}</span>
+                                <span class="font-medium">{{item.listPrice * item.quantity | currency:'EUR'}}</span>
                             </div>
                         }
                     </div>
                 </ng-container>
 
-                <!-- Bottone Conferma (Proiezione) -->
+                <!-- confirm button -->
                 <ng-container actionButtons>
                     <button mat-flat-button color="primary" 
-                            class="w-full mt-6 !py-6 !text-lg !rounded-lg"
+                            class="w-full mt-6 py-6! text-lg! rounded-lg!"
                             [disabled]="isProcessing() || checkoutForm.invalid"
                             (click)="placeOrder()">
                         
                         @if(isProcessing()) {
                             <span class="flex items-center gap-2">
-                                <mat-spinner diameter="20" color="accent"></mat-spinner> Processing...
+                                <mat-spinner diameter="20" color="accent"></mat-spinner> In elaborazione...
                             </span>
                         } @else {
-                            Confirm & Pay
+                            Conferma ordine
                         }
                     </button>
                 </ng-container>

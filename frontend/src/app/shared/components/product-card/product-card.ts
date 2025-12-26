@@ -17,6 +17,7 @@ import { environment } from '../../../../environments/environment';
 export class ProductCard {
     cartService = inject(CartService);
     product = input.required<ProductListItem>();
+    viewMode = input<'grid' | 'list'>('grid');
     private backendHost = environment.apiUrl.replace('/api', '');
     imageUrl = computed(() => {
         const url = this.product().thumbnailUrl;

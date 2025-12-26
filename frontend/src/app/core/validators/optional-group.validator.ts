@@ -4,13 +4,13 @@ export function conditionalRequiredGroupValidator(fieldKeys: string[]): Validato
     return (formGroup: AbstractControl): ValidationErrors | null => {
         const controls = fieldKeys.map((key) => formGroup.get(key));
 
-        // Check if at least one field in the group has a value
+        // check if at least one field in the group has a value
         const hasAnyFieldFilled = controls.some((control) => {
             const value = control?.value;
             return value && value.toString().trim() !== '';
         });
 
-        // If all fields are empty, the group is optional and valid
+        // if all fields are empty, the group is optional and valid
         if (!hasAnyFieldFilled) {
             controls.forEach((control) => {
                 if (control?.hasError('required')) {
@@ -20,7 +20,7 @@ export function conditionalRequiredGroupValidator(fieldKeys: string[]): Validato
             return null;
         }
 
-        // At least one field is filled, so all fields become required
+        // at least one field is filled, so all fields become required
         let hasMissingFields = false;
 
         controls.forEach((control) => {
@@ -28,18 +28,18 @@ export function conditionalRequiredGroupValidator(fieldKeys: string[]): Validato
             const isEmpty = !value || value.toString().trim() === '';
 
             if (isEmpty) {
-                // Field is empty but required because group was started
+                // field is empty but required because group was started
                 control?.setErrors({ required: true });
                 hasMissingFields = true;
             } else {
-                // Field has a value, clear any 'required' error
+                // field has a value, clear any 'required' error
                 if (control?.hasError('required')) {
                     control.setErrors(null);
                 }
             }
         });
 
-        // Return group-level error if some fields are missing
+        // return group-level error if some fields are missing
         return hasMissingFields ? { incompleteGroup: true } : null;
     };
 }

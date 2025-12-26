@@ -1,138 +1,134 @@
-<div class="mx-auto max-w-[1200px] px-4 py-8">
+<div class="mx-auto max-w-300 px-4 py-8">
 
     @if (isLoading()) {
-        <div class="flex justify-center py-20">
-            <mat-spinner diameter="50" color="warn"></mat-spinner>
-        </div>
+    <div class="flex justify-center py-20">
+        <mat-spinner diameter="50" color="warn"></mat-spinner>
+    </div>
     }
-
+    
     @if (product(); as p) {
-        <!-- Back Button -->
-        <a [routerLink]="backRoute()" 
-           class="inline-flex items-center gap-2 text-gray-500 hover:text-red-600 mb-6 font-medium transition-colors no-underline cursor-pointer">
-            <mat-icon class="!w-5 !h-5 !text-[20px]">arrow_back</mat-icon>
-            Back to {{ p.category?.name || 'Products' | titlecase }}
-        </a>
+    <div class="mb-6">
+        <app-back-button [navigateTo]="backRoute()">
+            Torna Alla Categoria {{ p.category?.name || 'Products' | titlecase }}
+        </app-back-button>
+    </div>
 
-        <div class="flex flex-col md:flex-row gap-10">
-            
-            <!-- Colonna Sinistra: Immagine -->
-            <div class="w-full md:w-1/2 bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden p-8 flex items-center justify-center min-h-[400px]">
-                <img [src]="imageUrl()" 
-                     [alt]="p.name"
-                     class="w-full h-auto max-h-[500px] object-contain transition-transform duration-500 hover:scale-105"
-                     style="view-transition-name: product-image" />
-            </div>
+    <div class="flex flex-col md:flex-row gap-10">
 
-            <!-- Colonna Destra: Info -->
-            <div class="flex-1">
-                <!-- Header Info -->
-                <div class="flex justify-between items-start mb-4">
-                    <span class="inline-block px-3 py-1 rounded-full bg-red-50 text-red-700 text-xs font-bold uppercase tracking-wide border border-red-100">
-                        {{ p.category?.name || 'Bike' }}
-                    </span>
-                    <span class="text-xs text-gray-400 font-mono">#{{ p.productNumber }}</span>
-                </div>
-
-                <h1 class="text-3xl md:text-4xl font-bold text-gray-900 leading-tight mb-2">
-                    {{ p.name }}
-                </h1>
-                
-                <!-- Prezzo -->
-                <p class="text-3xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                    {{ p.listPrice | currency:'USD' }}
-                    <span class="text-sm font-normal text-gray-500 mt-2">excl. tax</span>
-                </p>
-
-                <!-- Specifiche (Color, Size, Weight, Model) -->
-                @if(p.color || p.size || p.weight || p.model?.name) {
-                    <div class="bg-gray-50 rounded-lg p-5 mb-6 border border-gray-200">
-                        <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Specifications</h3>
-                        <div class="grid grid-cols-2 gap-y-3 gap-x-4 text-sm">
-                            @if(p.model?.name) { 
-                                <div class="flex flex-col">
-                                    <span class="text-gray-500 text-xs">Model</span>
-                                    <span class="font-medium text-gray-900">{{ p.model?.name }}</span>
-                                </div> 
-                            }
-                            @if(p.color) { 
-                                <div class="flex flex-col">
-                                    <span class="text-gray-500 text-xs">Color</span>
-                                    <span class="font-medium text-gray-900">{{ p.color }}</span>
-                                </div> 
-                            }
-                            @if(p.size) { 
-                                <div class="flex flex-col">
-                                    <span class="text-gray-500 text-xs">Size</span>
-                                    <span class="font-medium text-gray-900">{{ p.size }}</span>
-                                </div> 
-                            }
-                            @if(p.weight) { 
-                                <div class="flex flex-col">
-                                    <span class="text-gray-500 text-xs">Weight</span>
-                                    <span class="font-medium text-gray-900">{{ p.weight | number:'1.2-2' }} g</span>
-                                </div> 
-                            }
-                        </div>
-                    </div>
-                }
-
-                <!-- Descrizione -->
-                @if(p.description?.description) {
-                    <div class="mb-8">
-                        <h3 class="font-bold text-gray-900 mb-2">About this product</h3>
-                        <p class="text-gray-600 leading-relaxed text-sm">
-                            {{ p.description?.description }}
-                        </p>
-                    </div>
-                }
-
-                <!-- Azioni: Quantità e Add to Cart -->
-                <div class="border-t border-gray-200 pt-6">
-                    <div class="flex items-center gap-4 mb-6">
-                        <span class="font-medium text-gray-700">Quantity:</span>
-                        <app-quantity-selector [quantity]="quantity()" (quantityChange)="updateQuantity($event)" />
-                    </div>
-
-                    <div class="flex gap-4">
-                        <button mat-flat-button color="primary" 
-                                class="!py-6 !text-base flex-1 !rounded-lg"
-                                (click)="cartService.addToCart(p, quantity())">
-                            <mat-icon class="mr-2">shopping_cart</mat-icon>
-                            Add to Cart
-                        </button>
-                        
-                        <!-- Bottone Wishlist (Placeholder visivo) -->
-                        <button mat-stroked-button class="!py-6 !min-w-[60px] !rounded-lg border-gray-300 text-gray-500 hover:bg-gray-50">
-                            <mat-icon>favorite_border</mat-icon>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Footer Info -->
-                <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-gray-500">
-                    <div class="flex items-center gap-2">
-                        <mat-icon class="!w-5 !h-5 !text-[20px] text-gray-400">local_shipping</mat-icon>
-                        <span>Free shipping over $50</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <mat-icon class="!w-5 !h-5 !text-[20px] text-gray-400">verified</mat-icon>
-                        <span>Original Warranty</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <mat-icon class="!w-5 !h-5 !text-[20px] text-gray-400">sync</mat-icon>
-                        <span>30 Days Return</span>
-                    </div>
-                </div>
-
-            </div>
+        <!-- left col: img -->
+        <div class="w-full md:w-1/2 bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden p-8 flex items-center justify-center min-h-100">
+            <img 
+                [src]="imageUrl()" 
+                (error)="handleMissingImage($event)"
+                [alt]="p.name"
+                class="w-full h-auto max-h-125 object-contain transition-transform duration-500 hover:scale-105"
+                style="view-transition-name: product-image" 
+            />
         </div>
+
+        <!-- right col: info -->
+        <div class="flex-1">
+            <!-- header info -->
+            <div class="flex justify-between items-start mb-4">
+                <span class="inline-block px-3 py-1 rounded-full bg-red-50 text-red-700 text-xs font-bold uppercase tracking-wide border border-red-100">
+                    {{ p.category?.name || 'Bike' }}
+                </span>
+                <span class="text-xs text-gray-400 font-mono">#{{ p.productNumber }}</span>
+            </div>
+
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 leading-tight mb-2">
+                {{ p.name }}
+            </h1>
+
+            <!-- price -->
+            <p class="text-3xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                {{ p.listPrice | currency:'EUR' }}
+                <span class="text-sm font-normal text-gray-500 mt-2">escl. tasse</span>
+            </p>
+
+            <!-- product info -->
+            @if(p.color || p.size || p.weight || p.model?.name) {
+            <div class="bg-gray-50 rounded-lg p-5 mb-6 border border-gray-200">
+                <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Specifiche</h3>
+                <div class="grid grid-cols-2 gap-y-3 gap-x-4 text-sm">
+                    @if(p.model?.name) {
+                    <div class="flex flex-col">
+                        <span class="text-gray-500 text-xs">Modello</span>
+                        <span class="font-medium text-gray-900">{{ p.model?.name }}</span>
+                    </div>
+                    }
+                    @if(p.color) {
+                    <div class="flex flex-col">
+                        <span class="text-gray-500 text-xs">Colore</span>
+                        <span class="font-medium text-gray-900">{{ p.color }}</span>
+                    </div>
+                    }
+                    @if(p.size) {
+                    <div class="flex flex-col">
+                        <span class="text-gray-500 text-xs">Taglia</span>
+                        <span class="font-medium text-gray-900">{{ p.size }}</span>
+                    </div>
+                    }
+                    @if(p.weight) {
+                    <div class="flex flex-col">
+                        <span class="text-gray-500 text-xs">Peso</span>
+                        <span class="font-medium text-gray-900">{{ p.weight | number:'1.2-2' }} g</span>
+                    </div>
+                    }
+                </div>
+            </div>
+            }
+
+            <!-- description -->
+            @if(p.description?.description) {
+            <div class="mb-8">
+                <h3 class="font-bold text-gray-900 mb-2">Informazioni su questo prodotto</h3>
+                <p class="text-gray-600 leading-relaxed text-sm">
+                    {{ p.description?.description }}
+                </p>
+            </div>
+            }
+
+            <!-- actions -->
+            <div class="border-t border-gray-200 pt-6">
+                <div class="flex items-center gap-4 mb-6">
+                    <span class="font-medium text-gray-700">Quantità:</span>
+                    <app-quantity-selector [quantity]="quantity()" (quantityChange)="updateQuantity($event)" />
+                </div>
+
+                <div class="flex gap-4">
+                    <button mat-flat-button color="primary" class="py-6! text-base! flex-1 rounded-lg!"
+                        (click)="cartService.addToCart(p, quantity())">
+                        <mat-icon class="mr-2">shopping_cart</mat-icon>
+                        Aggiungi al Carrello
+                    </button>
+                </div>
+            </div>
+
+            <!-- footer info -->
+            <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-gray-500">
+                <div class="flex items-center gap-2">
+                    <mat-icon class="w-5! h-5! text-[20px]! text-gray-400">local_shipping</mat-icon>
+                    <span>Spedizione gratuita oltre i 50€</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <mat-icon class="w-5! h-5! text-[20px]! text-gray-400">verified</mat-icon>
+                    <span>Garanzia Originale</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <mat-icon class="w-5! h-5! text-[20px]! text-gray-400">sync</mat-icon>
+                    <span>Reso entro 30 giorni</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
     }
 
     @if(!isLoading() && !product()) {
-        <div class="text-center py-20">
-            <h2 class="text-2xl font-bold text-gray-800">Product not found</h2>
-            <a routerLink="/products" class="text-red-600 hover:underline mt-4 inline-block">Return to shop</a>
-        </div>
+    <div class="text-center py-20">
+        <h2 class="text-2xl font-bold text-gray-800">Prodotto non trovato</h2>
+        <a routerLink="/products" class="text-red-600 hover:underline mt-4 inline-block">Torna al negozio</a>
+    </div>
     }
 </div>

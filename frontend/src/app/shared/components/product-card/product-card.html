@@ -1,27 +1,116 @@
-<div class="relative bg-white cursor-pointer rounded-xl shadow-lg overflow-hidden flex flex-col h-full transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-xl"
-    [routerLink]="['/products', product().productId]">
-    <img [src]="imageUrl()" class="w-full h-75 object-cover" alt="{{ product().name }}" (error)="handleMissingImage($event)"
-        [style.view-transition-name]="'product-image-' + product().productId">
-    <ng-content />
+<!-- 
+  CONTAINER CARD
+-->
+<div class="group relative bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 flex overflow-hidden h-full"
+    [class.flex-col]="viewMode() === 'grid'" [class.flex-row]="viewMode() === 'list'"
+    [class.items-stretch]="viewMode() === 'list'" [class.min-h-[220px]]="viewMode() === 'list'">
 
-    <div class="p-5 flex flex-col flex-1">
-        <h3 class="text-lg font-semibold text-gray-900 mb-2 leading-tight">{{product().name}}</h3>
-        <div class="relative group">
-            <p class="text-sm text-gray-600 mb-4 leading-relaxed line-clamp-3">
-                {{product().description}}
+    <!-- LINK "FANTASMA" CHE COPRE TUTTA LA CARD -->
+    <!-- Importante: z-0 per stare sotto al bottone del carrello -->
+    <a [routerLink]="['/products', product().productId]" class="absolute inset-0 z-0 focus:outline-none"
+        aria-label="Vedi dettagli prodotto">
+    </a>
+
+    <!-- 
+      SEZIONE IMMAGINE 
+      - Grid: bg-gray-100 leggermente più scuro come nello screen
+    -->
+    <div class="relative overflow-hidden bg-[#f7f7f7] shrink-0" [class.w-full]="viewMode() === 'grid'"
+        [class.pt-[100%]]="viewMode() === 'grid'" [class.w-56]="viewMode() === 'list'"
+        [class.self-stretch]="viewMode() === 'list'" [class.border-r]="viewMode() === 'list'"
+        [class.border-gray-200]="viewMode() === 'list'">
+
+        <img [src]="imageUrl()" alt="{{ product().name }}" (error)="handleMissingImage($event)"
+            class="absolute top-0 left-0 w-full h-full object-contain p-0 transition-transform duration-500 group-hover:scale-105 mix-blend-multiply">
+    </div>
+
+     <!-- @if(!product().isAvailable) {
+            <div class="absolute inset-0 flex items-center justify-center bg-white/60 z-10">
+                <span class="bg-gray-800 text-white text-xs font-bold px-2 py-1 rounded">ESAURITO</span>
+            </div>
+        } -->
+
+    <!-- SEZIONE CONTENUTO -->
+    <!-- Pointer-events-none sul container per evitare conflitti, riattiviamo sul contenuto -->
+    <div class="flex flex-col flex-1 pointer-events-none" [class.p-4]="viewMode() === 'grid'"
+        [class.p-6]="viewMode() === 'list'" [class.justify-between]="viewMode() === 'list'">
+
+        <!-- MODALITÀ GRID (Layout Amazon: Prezzo -> Titolo -> Descrizione) -->
+        @if (viewMode() === 'grid') {
+        <div class="flex flex-col h-full pointer-events-auto">
+            <!-- Prezzo (Grande e in alto) -->
+            <div class="mb-1">
+                <span class="text-2xl font-medium text-gray-900 tracking-tight">
+                    {{ product().listPrice | currency:'EUR' }}
+                </span>
+                <!-- Esempio prezzo consigliato piccolo (opzionale) -->
+                <!-- <span class="text-xs text-gray-500 line-through ml-2">€ 20.00</span> -->
+            </div>
+
+            <!-- Titolo (Semplice e pulito) -->
+            <h3
+                class="text-sm font-normal text-gray-700 leading-snug line-clamp-2 mb-2 group-hover:text-red-600 transition-colors">
+                {{ product().name }}
+            </h3>
+
+            <div class="mb-2">
+                    @if(product().isAvailable) {
+                        <span class="text-[11px] font-bold text-green-700">Disponibilità immediata</span>
+                    } @else {
+                        <span class="text-[11px] font-bold text-red-600">Non disponibile</span>
+                    }
+                </div>
+
+            <!-- Descrizione (Piccola, max 2 righe in griglia) -->
+            <p class="text-xs text-gray-500 line-clamp-4 mb-4">
+                {{ product().description || 'Nessuna descrizione disponibile.' }}
             </p>
-        </div>
-        <div class="text-sm font-medium mb-4">
-            {{ product().isAvailable ? 'In Stock' : 'Out of Stock' }}
-        </div>
 
-        <div class="flex items-center justify-between mt-auto gap-2">
-            <span class="text-xl font-bold text-gray-900">{{product().listPrice | currency:'USD'}}</span>
-            <button mat-flat-button class="shadow-sm! hover:shadow-md!" [disabled]="!product().isAvailable"
-                (click)="$event.stopPropagation(); cartService.addToCart(product(), 1)">
-                Acquista
-                <mat-icon>shopping_cart</mat-icon>
-            </button>
+            <!-- Spacer per spingere il bottone in basso -->
+            <div class="mt-auto pt-2 flex justify-end">
+                    <button mat-icon-button 
+                            [disabled]="!product().isAvailable"
+                            (click)="$event.preventDefault(); $event.stopPropagation(); cartService.addToCart(product())"
+                            color="warn" 
+                            class="relative z-20 !bg-gray-50 hover:!bg-red-50 border border-gray-200 hover:border-red-200 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                        <mat-icon [class.text-gray-400]="!product().isAvailable" [class.text-gray-600]="product().isAvailable">
+                            {{ product().isAvailable ? 'add_shopping_cart' : 'block' }}
+                        </mat-icon>
+                    </button>
+                </div>
+            </div>
+        
+        }
+
+        <!-- MODALITÀ LIST (Layout Classico: Titolo -> Descrizione -> Prezzo) -->
+        @if (viewMode() === 'list') {
+        <div class="flex flex-col h-full w-full pointer-events-auto">
+            <div>
+                <!-- Titolo -->
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-red-600 transition-colors">
+                    {{ product().name }}
+                </h3>
+
+                <!-- Descrizione completa -->
+                <p class="text-sm text-gray-600 mb-4 line-clamp-3">
+                    {{ product().description || 'Nessuna descrizione disponibile.' }}
+                </p>
+            </div>
+
+            <!-- Footer List Mode -->
+            <div class="mt-auto flex items-center justify-between border-t border-gray-100 pt-4">
+                <span class="text-2xl font-bold text-gray-900">
+                    {{ product().listPrice | currency:'EUR' }}
+                </span>
+
+                <button mat-flat-button color="warn"
+                    (click)="$event.preventDefault(); $event.stopPropagation(); cartService.addToCart(product())"
+                    class="relative z-20">
+                    <mat-icon>add_shopping_cart</mat-icon>
+                    Aggiungi
+                </button>
+            </div>
         </div>
+        }
     </div>
 </div>

@@ -1,19 +1,15 @@
 import { Component, inject, input, signal, computed, effect, untracked } from '@angular/core';
 import { CommonModule, CurrencyPipe, TitleCasePipe, DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
-
-// Material
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-
-// Services & Models
 import { ProductService } from '../../../shared/services/product.service';
 import { CartService } from '../../../shared/services/cart.service';
 import { Product } from '../../../shared/models/product.model';
 import { environment } from '../../../../environments/environment';
-// Components
 import { QuantitySelectorComponent } from '../../../shared/components/quantity-selector/quantity-selector';
+import { BackButton } from '../../../shared/components/back-button/back-button';
 
 @Component({
   selector: 'app-product-detail',
@@ -27,36 +23,21 @@ import { QuantitySelectorComponent } from '../../../shared/components/quantity-s
     CurrencyPipe,
     TitleCasePipe,
     DecimalPipe,
-    QuantitySelectorComponent
+    QuantitySelectorComponent,
+    BackButton,
   ],
   templateUrl: './product-detail.html',
 })
 export class ProductDetailComponent {
   private productService = inject(ProductService);
-  public cartService = inject(CartService); // Public per usarlo nell'HTML
+  public cartService = inject(CartService);
 
-  // Input dall'URL (es. /products/723 -> id = "723")
   productId = input<string>();
 
   product = signal<Product | null>(null);
   isLoading = signal(true);
   quantity = signal(1);
 
-  // Calcolo URL immagine corretto
-  imageUrl = computed(() => {
-    const p = this.product();
-    if (!p) return 'assets/images/placehold.webp';
-
-    const url = p.thumbnailUrl;
-    if (!url) return 'assets/images/placehold.webp';
-    if (url.startsWith('http')) return url;
-
-    // Aggiunge dominio backend
-    const backendHost = environment.apiUrl.replace('/api', '');
-    return `${backendHost}${url}`;
-  });
-
-  // Calcolo rotta "Indietro"
   backRoute = computed(() => {
     const p = this.product();
     if (p && p.productCategoryId) {
@@ -86,8 +67,24 @@ export class ProductDetailComponent {
       error: (err) => {
         console.error(err);
         this.isLoading.set(false);
-      }
+      },
     });
+  }
+
+  private backendHost = environment.apiUrl.replace('/api', '');
+  imageUrl = computed(() => {
+    const url = this.product()?.thumbnailUrl;
+    if (!url) return `${this.backendHost}/images/products/placehold.webp`;
+    return `${this.backendHost}${url}`;
+  });
+
+  handleMissingImage(event: Event) {
+    // chiamata quando l'immagine dà errore 404
+    const imgElement = event.target as HTMLImageElement;
+    const fallbackUrl = `${this.backendHost}/images/products/placehold.webp`;
+    if (imgElement.src !== fallbackUrl) {
+      imgElement.src = fallbackUrl;
+    }
   }
 
   updateQuantity(newQty: number) {

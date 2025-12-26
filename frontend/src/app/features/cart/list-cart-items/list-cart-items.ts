@@ -10,14 +10,14 @@ import { ShowCartItem } from '../show-cart-item/show-cart-item';
   template: `
     <div class="border border-gray-200 rounded-xl p-6 bg-white shadow-sm">
         <h2 class="text-xl font-bold mb-6 border-b border-gray-100 pb-4">
-            Cart Items ({{ cartService.count() }})
+            Prodotti ({{ cartService.count() }})
         </h2>
         
         <div class="flex flex-col gap-6">
             @for(item of cartService.cartItems(); track item.productId){
                 <app-show-cart-item [item]="item"></app-show-cart-item>
-                
-                <!-- Separatore tra gli item tranne l'ultimo -->
+
+                <!-- product separator -->
                 @if(!$last) {
                     <div class="h-px bg-gray-100"></div>
                 }
