@@ -140,7 +140,9 @@ namespace backend.Services
                     ? $"/images/products/{product.ThumbnailPhotoFileName}" 
                     : "/images/products/placehold.webp",
 
-                ThumbnailFileName = product.ThumbnailPhotoFileName
+                ThumbnailFileName = product.ThumbnailPhotoFileName,
+                // calcolo disponibilità direttamente in SQL
+                IsAvailable = product.SellEndDate == null || product.SellEndDate > DateTime.UtcNow,
             };
             return ApiResponse<ProductDto>.Success(dto, "Product retrieved");
         }
@@ -551,6 +553,7 @@ namespace backend.Services
                     Name = p.Name,
                     ProductNumber = p.ProductNumber,
                     ListPrice = p.ListPrice,
+                    Category = p.ProductCategory.Name,
 
                     // calcolo disponibilità direttamente in SQL
                     IsAvailable = p.SellEndDate == null || p.SellEndDate > DateTime.UtcNow,

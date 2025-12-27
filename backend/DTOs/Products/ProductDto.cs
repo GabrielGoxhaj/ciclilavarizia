@@ -12,6 +12,7 @@
         //public string? ThumbnailBase64 { get; set; } 
         public string? ThumbnailUrl { get; set; }
         public string? ThumbnailFileName { get; set; }
+        public bool IsAvailable { get; set; }
         public int? ProductCategoryId { get; set; }
         public ProductCategoryDto? Category { get; set; }
         public int? ProductModelId { get; set; }
