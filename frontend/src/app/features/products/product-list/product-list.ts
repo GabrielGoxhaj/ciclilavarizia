@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { CategorySidebarComponent } from '../../../core/components/sidebar/sidebar';
@@ -22,6 +23,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
     MatIconModule,
     MatButtonModule,
     MatButtonToggleModule,
+    MatTooltipModule,
     CategorySidebarComponent,
     ProductCard,
     Paginator,

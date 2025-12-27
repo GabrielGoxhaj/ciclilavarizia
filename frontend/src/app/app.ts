@@ -3,11 +3,12 @@ import { RouterOutlet, Router, Scroll } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { HeaderComponent } from './core/components/header/header';
 import { Footer } from './core/components/footer/footer';
+import { Toast } from 'primeng/toast';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, Footer, HeaderComponent],
+  imports: [RouterOutlet, Footer, HeaderComponent, Toast],
   templateUrl: './app.html',
   styleUrls: ['./app.css'],
 })

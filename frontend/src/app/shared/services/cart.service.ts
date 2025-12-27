@@ -25,7 +25,7 @@ export class CartService {
 
     if (existingItem) {
       this.updateQuantity(product.productId, existingItem.quantity + quantity);
-      this.toastService.info(`Quantità aggiornata: ${product.name}`);
+      this.toastService.info(product.name, 'Quantità aggiornata');
     } else {
       const newItem: CartItem = {
         productId: product.productId,
@@ -37,7 +37,7 @@ export class CartService {
 
       this.cartItems.update((items) => [...items, newItem]);
       this.saveToLocalStorage();
-      this.toastService.success(`${product.name} aggiunto al carrello`);
+      this.toastService.success(product.name, 'Aggiunto al carrello');
     }
   }
 
@@ -54,8 +54,12 @@ export class CartService {
   }
 
   public removeFromCart(productId: number): void {
+    const itemToRemove = this.cartItems().find((i) => i.productId === productId);
     this.cartItems.update((items) => items.filter((i) => i.productId !== productId));
     this.saveToLocalStorage();
+    if (itemToRemove) {
+      this.toastService.info(itemToRemove.name, 'Rimosso dal carrello');
+    }
   }
 
   public clearCart(): void {
@@ -80,7 +84,10 @@ export class CartService {
         this.cartItems.set(items);
       } catch (e) {
         console.error('Error parsing cart from localstorage', e);
-        this.clearCart();
+        this.toastService.error('Dati del carrello corrotti, reset eseguito.', 'Errore Caricamento');
+        
+        this.cartItems.set([]);
+        localStorage.removeItem('cart');
       }
     }
   }

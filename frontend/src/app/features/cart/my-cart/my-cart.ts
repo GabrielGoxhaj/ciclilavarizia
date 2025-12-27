@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { Router, RouterLink } from '@angular/router'; // <--- Import Router
+import { Router, RouterLink } from '@angular/router'; 
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { ListCartItems } from '../list-cart-items/list-cart-items';
@@ -27,19 +27,16 @@ export default class MyCartComponent {
   cartService = inject(CartService);
   private authService = inject(AuthService);
   private dialog = inject(MatDialog);
-  private router = inject(Router); // <--- Inject Router
+  private router = inject(Router); 
 
   proceedToCheckout() {
-    // Verifica se l'utente è loggato (isLoggedIn è un Signal, quindi usa le parentesi)
     if (this.authService.isLoggedIn()) {
       this.router.navigate(['/checkout']);
     } else {
-      // Apre il modal di login
       const dialogRef = this.dialog.open(LoginComponent, {
         width: '400px'
       });
 
-      // Dopo la chiusura del login, se è andato a buon fine, vai al checkout
       dialogRef.afterClosed().subscribe(result => {
         if (result === true) {
             this.router.navigate(['/checkout']);

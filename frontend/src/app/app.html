@@ -1,6 +1,11 @@
 <app-header class="sticky top-0 z-50 w-full block"></app-header>
 
 <main class="min-h-[calc(100vh-64px)]">
+   <p-toast 
+      position="bottom-center" 
+      [preventOpenDuplicates]="true" 
+      [baseZIndex]="5000">
+  </p-toast>
   <router-outlet></router-outlet>
 </main>
 

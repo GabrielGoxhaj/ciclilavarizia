@@ -10,6 +10,7 @@ import {
 import { tap } from 'rxjs';
 import { ApiResponse } from '../models/api-response.model';
 import { Router } from '@angular/router';
+import { ToastService } from './toast.service';
 
 @Injectable({
   providedIn: 'root',
@@ -18,6 +19,7 @@ export class AuthService {
   private baseUrl = environment.apiUrl;
   private http = inject(HttpClient);
   private router = inject(Router);
+  private toastService = inject(ToastService);
 
   currentUser = signal<AuthResponse | null>(null);
 
@@ -63,7 +65,7 @@ export class AuthService {
   logout() {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('user_info');
-
+    this.toastService.info('Disconnessione effettuata', 'Arrivederci');
     this.currentUser.set(null);
 
     this.router.navigate(['/']);

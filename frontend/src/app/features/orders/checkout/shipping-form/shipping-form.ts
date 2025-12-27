@@ -10,31 +10,31 @@ import { MatInputModule } from '@angular/material/input';
     template: `
         <div [formGroup]="group" class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <mat-form-field appearance="outline" class="col-span-1 md:col-span-2">
-                <mat-label>Address</mat-label>
+                <mat-label>Via/Piazza</mat-label>
                 <input matInput formControlName="addressLine1" placeholder="123 Main St" />
-                <mat-error>Address is required</mat-error>
+                <mat-error>Il campo è obbligatorio</mat-error>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
-                <mat-label>City</mat-label>
+                <mat-label>Città</mat-label>
                 <input matInput formControlName="city" />
-                <mat-error>City is required</mat-error>
+                <mat-error>Il campo è obbligatorio</mat-error>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
-                <mat-label>Postal Code</mat-label>
+                <mat-label>Codice Postale</mat-label>
                 <input matInput formControlName="postalCode" />
-                <mat-error>Required</mat-error>
+                <mat-error>Il campo è obbligatorio</mat-error>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
-                <mat-label>Country</mat-label>
+                <mat-label>Stato</mat-label>
                 <input matInput formControlName="countryRegion" />
-                <mat-error>Required</mat-error>
+                <mat-error>Il campo è obbligatorio</mat-error>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
-                <mat-label>State / Province</mat-label>
+                <mat-label>Provincia</mat-label>
                 <input matInput formControlName="stateProvince" />
             </mat-form-field>
         </div>

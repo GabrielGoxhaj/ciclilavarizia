@@ -31,7 +31,7 @@
                         @if(useSavedAddress()) {
                             <div class="ml-8 mt-2 max-w-md">
                                 <mat-form-field appearance="outline" class="w-full">
-                                    <mat-label>Select Address</mat-label>
+                                    <mat-label>Seleziona Indirizzo</mat-label>
                                     <mat-select formControlName="existingAddressId">
                                         @for (addr of addresses(); track addr.addressId) {
                                             <mat-option [value]="addr.addressId">

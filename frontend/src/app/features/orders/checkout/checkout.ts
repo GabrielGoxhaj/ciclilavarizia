@@ -18,14 +18,25 @@ import { OrderSummary } from '../../../shared/components/order-summary/order-sum
 import { BackButton } from '../../../shared/components/back-button/back-button';
 import { Address, CreateAddressRequest } from '../../../shared/models/address.model';
 import { CreateOrderRequest } from '../../../shared/models/order.model';
+import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-checkout',
   standalone: true,
   imports: [
-    CommonModule, ReactiveFormsModule,
-    MatButtonModule, MatRadioModule, MatSelectModule, MatFormFieldModule, MatIconModule, MatProgressSpinnerModule,
-    ShippingFormComponent, PaymentFormComponent, OrderSummary, BackButton, CurrencyPipe
+    CommonModule,
+    ReactiveFormsModule,
+    MatButtonModule,
+    MatRadioModule,
+    MatSelectModule,
+    MatFormFieldModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    ShippingFormComponent,
+    PaymentFormComponent,
+    OrderSummary,
+    BackButton,
+    CurrencyPipe,
   ],
   templateUrl: './checkout.html',
 })
@@ -35,6 +46,7 @@ export default class CheckoutComponent implements OnInit {
   cartService = inject(CartService);
   orderService = inject(OrderService);
   customerService = inject(CustomerService);
+  private toastService = inject(ToastService);
 
   isProcessing = signal(false);
   addresses = signal<Address[]>([]);
@@ -51,18 +63,22 @@ export default class CheckoutComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.cartService.count() === 0) {
-        this.router.navigate(['/products']);
-        return;
+      this.toastService.info('Il tuo carrello è vuoto', 'Carrello');
+      this.router.navigate(['/products']);
+      return;
     }
 
-     this.customerService.getMyAddresses().subscribe({
+    this.customerService.getMyAddresses().subscribe({
       next: (response) => {
-        const addresses = response.data || []; 
-        
+        const addresses = response.data || [];
+
         this.addresses.set(addresses);
-        this.toggleAddressMode(addresses.length > 0); 
+        this.toggleAddressMode(addresses.length > 0);
       },
-      error: () => this.toggleAddressMode(false)
+      error: () => {
+        this.toggleAddressMode(false);
+        this.toastService.warning('Impossibile caricare gli indirizzi salvati', 'Attenzione');
+      },
     });
   }
 
@@ -71,17 +87,17 @@ export default class CheckoutComponent implements OnInit {
     const controls = this.checkoutForm.controls;
 
     if (useSaved) {
-        controls.existingAddressId.setValidators(Validators.required);
-        ['addressLine1', 'city', 'postalCode', 'countryRegion'].forEach(k => {
-            this.checkoutForm.get(k)?.clearValidators();
-            this.checkoutForm.get(k)?.updateValueAndValidity();
-        });
+      controls.existingAddressId.setValidators(Validators.required);
+      ['addressLine1', 'city', 'postalCode', 'countryRegion'].forEach((k) => {
+        this.checkoutForm.get(k)?.clearValidators();
+        this.checkoutForm.get(k)?.updateValueAndValidity();
+      });
     } else {
-        controls.existingAddressId.clearValidators();
-        ['addressLine1', 'city', 'postalCode', 'countryRegion'].forEach(k => {
-            this.checkoutForm.get(k)?.setValidators(Validators.required);
-            this.checkoutForm.get(k)?.updateValueAndValidity();
-        });
+      controls.existingAddressId.clearValidators();
+      ['addressLine1', 'city', 'postalCode', 'countryRegion'].forEach((k) => {
+        this.checkoutForm.get(k)?.setValidators(Validators.required);
+        this.checkoutForm.get(k)?.updateValueAndValidity();
+      });
     }
     controls.existingAddressId.updateValueAndValidity();
   }
@@ -89,6 +105,7 @@ export default class CheckoutComponent implements OnInit {
   placeOrder() {
     if (this.checkoutForm.invalid) {
       this.checkoutForm.markAllAsTouched();
+      this.toastService.warning('Compila tutti i campi obbligatori per procedere', 'Dati Mancanti');
       return;
     }
 
@@ -98,44 +115,47 @@ export default class CheckoutComponent implements OnInit {
     let addressIdObservable;
 
     if (this.useSavedAddress()) {
-        addressIdObservable = of(val.existingAddressId!); 
+      addressIdObservable = of(val.existingAddressId!);
     } else {
-        const newAddress: CreateAddressRequest = {
-            addressType: 'Shipping',
-            addressLine1: val.addressLine1!,
-            city: val.city!,
-            postalCode: val.postalCode!,
-            countryRegion: val.countryRegion!,
-            stateProvince: val.stateProvince || 'N/A'
-        };
-        
-        addressIdObservable = this.customerService.createAddress(newAddress).pipe(
-            switchMap(res => of(res.data!.addressId)) 
-        );
+      const newAddress: CreateAddressRequest = {
+        addressType: 'Shipping',
+        addressLine1: val.addressLine1!,
+        city: val.city!,
+        postalCode: val.postalCode!,
+        countryRegion: val.countryRegion!,
+        stateProvince: val.stateProvince || 'N/A',
+      };
+
+      addressIdObservable = this.customerService
+        .createAddress(newAddress)
+        .pipe(switchMap((res) => of(res.data!.addressId)));
     }
 
-    addressIdObservable.pipe(
+    addressIdObservable
+      .pipe(
         switchMap((addressId) => {
-            const orderPayload: CreateOrderRequest = {
-                addressId: addressId,
-                items: this.cartService.cartItems().map(i => ({
-                    productId: i.productId,
-                    quantity: i.quantity
-                }))
-            };
-            return this.orderService.createOrder(orderPayload);
+          const orderPayload: CreateOrderRequest = {
+            addressId: addressId,
+            items: this.cartService.cartItems().map((i) => ({
+              productId: i.productId,
+              quantity: i.quantity,
+            })),
+          };
+          return this.orderService.createOrder(orderPayload);
         })
-    ).subscribe({
+      )
+      .subscribe({
         next: (res) => {
-            this.cartService.clearCart();
-            const orderId = res.data!.salesOrderId; 
-            this.router.navigate(['/order-success', orderId]);
+          this.cartService.clearCart();
+          const orderId = res.data!.salesOrderId;
+          this.router.navigate(['/order-success', orderId]);
         },
         error: (err) => {
-            console.error(err);
-            this.isProcessing.set(false);
-            alert('Order failed: ' + (err.error?.message || 'Unknown error'));
-        }
-    });
+          console.error(err);
+          this.isProcessing.set(false);
+          this.toastService.error('Si è verificato un errore durante la creazione dell\'ordine', 'Ordine Fallito');
+          alert('Order failed: ' + (err.error?.message || 'Unknown error'));
+        },
+      });
   }
 }

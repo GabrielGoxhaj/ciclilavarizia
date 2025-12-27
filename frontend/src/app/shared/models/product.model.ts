@@ -24,6 +24,7 @@ export interface Product {
   weight?: number;
   thumbnailUrl?: string;
   thumbnailFileName?: string;
+  isAvailable?: boolean; 
 
   productCategoryId?: number;
   category?: Category;

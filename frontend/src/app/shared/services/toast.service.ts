@@ -1,36 +1,40 @@
 import { Injectable, inject } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MessageService } from 'primeng/api';
 
-export type ToastType = 'success' | 'error' | 'warning' | 'info';
+export type ToastType = 'success' | 'error' | 'warn' | 'info'; 
 
 @Injectable({
   providedIn: 'root',
 })
 export class ToastService {
-  private snackBar = inject(MatSnackBar);
+  private messageService = inject(MessageService);
 
-  show(message: string, type: ToastType = 'info', duration = 3000): void {
-    this.snackBar.open(message, 'Chiudi', {
-      duration,
-      horizontalPosition: 'center',
-      verticalPosition: 'bottom',
-      panelClass: [`toast-${type}`]
+  show(message: string, type: ToastType = 'info', title: string = '', duration = 3000): void {
+    this.messageService.add({
+      severity: type,
+      summary: title, 
+      detail: message, 
+      life: duration  
     });
   }
 
-  success(message: string, duration = 3000): void {
-    this.show(message, 'success', duration);
+  success(message: string, title: string = 'Successo', duration = 2000): void {
+    this.show(message, 'success', title, duration);
   }
 
-  error(message: string, duration = 5000): void {
-    this.show(message, 'error', duration);
+  error(message: string, title: string = 'Errore', duration = 4000): void {
+    this.show(message, 'error', title, duration);
   }
 
-  warning(message: string, duration = 4000): void {
-    this.show(message, 'warning', duration);
+  warning(message: string, title: string = 'Attenzione', duration = 4000): void {
+    this.show(message, 'warn', title, duration);
   }
 
-  info(message: string, duration = 3000): void {
-    this.show(message, 'info', duration);
+  info(message: string, title: string = 'Info', duration = 2000): void {
+    this.show(message, 'info', title, duration);
+  }
+  
+  clear() {
+      this.messageService.clear();
   }
 }

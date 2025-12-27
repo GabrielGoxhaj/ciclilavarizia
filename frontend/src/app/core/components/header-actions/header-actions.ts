@@ -9,6 +9,7 @@ import { CartService } from '../../../shared/services/cart.service';
 import { AuthService } from '../../../shared/services/auth.service';
 import { LoginComponent } from '../login/login';
 import { MatDialog } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-header-actions',
@@ -20,6 +21,7 @@ import { MatDialog } from '@angular/material/dialog';
     MatMenuModule,
     MatBadgeModule,
     MatDividerModule,
+    MatTooltipModule
   ],
   templateUrl: './header-actions.html',
   styleUrl: './header-actions.css' 

@@ -7,10 +7,10 @@ import { MatRadioModule } from '@angular/material/radio';
     imports: [MatRadioModule],
     template: `
         <div class="border border-gray-200 rounded-xl p-6 bg-white mt-6">
-            <h2 class="text-xl font-bold mb-4">Payment Method</h2>
+            <h2 class="text-xl font-bold mb-4">Metodo di Pagamento</h2>
             <mat-radio-group [value]="'stripe'">
                 <mat-radio-button value="stripe" color="primary" class="!flex items-center">
-                    <span class="ml-2 font-medium">Credit Card (Stripe)</span>
+                    <span class="ml-2 font-medium">Carta di Credito (Stripe)</span>
                 </mat-radio-button>
             </mat-radio-group>
         </div>
