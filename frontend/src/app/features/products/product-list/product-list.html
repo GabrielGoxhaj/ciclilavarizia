@@ -1,65 +1,96 @@
 <mat-sidenav-container autosize class="min-h-[calc(100vh-64px)] w-full overflow-x-hidden! bg-gray-50">
     <mat-sidenav mode="side" opened
         class="border-r border-gray-200 bg-white shadow-sm overflow-visible! relative h-auto min-h-full z-20"
-        style="view-transition-name: main-sidebar;" [class]="isSidebarCollapsed() ? 'w-10!' : 'w-68!'">
+        style="view-transition-name: main-sidebar;" [class]="isSidebarCollapsed() ? 'w-10!' : 'w-72!'">
 
-        <app-category-sidebar [activeCategory]="currentCategoryValue()" (collapsedChange)="onSidebarToggle($event)">
+        <!-- send current filters to sidebar for sync -->
+        <app-category-sidebar 
+            [activeCategory]="currentCategoryValue()" 
+            [currentFilters]="currentFilters()"
+            (collapsedChange)="onSidebarToggle($event)"
+            (filterChange)="onFilterChange($event)">
         </app-category-sidebar>
 
     </mat-sidenav>
 
-    <mat-sidenav-content class="bg-gray-50 p-8  ">
+    <mat-sidenav-content class="bg-gray-50 p-8">
 
-        <div class="flex justify-between items-end mb-8 border-b border-gray-200 pb-4">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-900 capitalize tracking-tight flex items-center min-h-10">
-                    @if (currentCategoryValue() === 'all') {
-                    All Products
-                    } @else {
-                    {{categoryName()}}
-                    }
+        <!-- header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+            
+            <!-- left: title and chips -->
+            <div class="flex-1 min-w-0">
+                <h1 class="text-3xl font-bold text-gray-900 capitalize tracking-tight flex items-center">
+                    @if (currentCategoryValue() === 'all') { All Products } @else { {{categoryName()}} }
                 </h1>
-                <p class="text-gray-500 mt-1 text-sm font-medium">
-                    @if (isLoading()) {
-                    Verifica disponibilità...
-                    } @else {
-                    <span class="text-red-600 font-bold">{{ totalItems() }}</span> Prodotti trovati
-                    }
-                </p>
+                
+                <div class="mt-2 flex flex-wrap items-center gap-3 min-h-8">
+                    <!-- info count -->
+                    <p class="text-gray-500 text-sm font-medium whitespace-nowrap mr-2">
+                        @if (isLoading()) { Ricerca... } @else { <span class="text-red-600 font-bold">{{ totalItems() }}</span> prodotti }
+                    </p>
+
+                    <!-- filter chips -->
+                    <mat-chip-listbox>
+                        @for (chip of activeFiltersList(); track chip.key) {
+                            <mat-chip-option 
+                                [selectable]="false"
+                                (removed)="removeFilter(chip)"
+                                class="custom-chip"
+                                color="warn" 
+                                highlighted> 
+                                {{ chip.label }}
+                                <button matChipRemove aria-label="Rimuovi filtro">
+                                    <mat-icon>cancel</mat-icon>
+                                </button>
+                            </mat-chip-option>
+                        }
+                    </mat-chip-listbox>
+
+                </div>
             </div>
 
-            <mat-button-toggle-group [value]="viewMode()" (change)="viewMode.set($event.value)"
-                hideSingleSelectionIndicator="true"
-                class="bg-white border border-gray-200 rounded-lg shadow-sm h-10 items-center">
+            <!-- right: controls -->
+            <div class="controls-wrapper mt-4 md:mt-0">
+                
+                <!-- sort Select -->
+                <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-48 dense-select bg-white rounded-lg">
+                    <mat-select [value]="currentSort()" (selectionChange)="onSortChange($event.value)">
+                        <mat-option value="name_asc">Nome (A-Z)</mat-option>
+                        <mat-option value="name_desc">Nome (Z-A)</mat-option>
+                        <mat-option value="price_asc">Prezzo (Crescente)</mat-option>
+                        <mat-option value="price_desc">Prezzo (Decrescente)</mat-option>
+                    </mat-select>
+                </mat-form-field>
 
-                <mat-button-toggle value="grid" aria-label="Vista Griglia" matTooltip="Vista Griglia">
-                    <mat-icon>grid_view</mat-icon>
-                </mat-button-toggle>
+                <!-- toggle View -->
+                <mat-button-toggle-group [value]="viewMode()" (change)="viewMode.set($event.value)"
+                    hideSingleSelectionIndicator="true"
+                    class="bg-white border border-gray-200 rounded-lg shadow-sm h-10 items-center">
+                    <mat-button-toggle value="grid" aria-label="Griglia" class="px-3!"><mat-icon>grid_view</mat-icon></mat-button-toggle>
+                    <mat-button-toggle value="list" aria-label="Elenco" class="px-3!"><mat-icon>view_list</mat-icon></mat-button-toggle>
+                </mat-button-toggle-group>
 
-                <mat-button-toggle value="list" aria-label="Vista Elenco" matTooltip="Vista Elenco">
-                    <mat-icon>view_list</mat-icon>
-                </mat-button-toggle>
-
-            </mat-button-toggle-group>
+            </div>
         </div>
 
+        <!-- product list -->
         @if (isLoading()) {
-        <div class="flex justify-center py-20">
-            <mat-spinner diameter="40" color="warn"></mat-spinner>
-        </div>
+            <div class="flex justify-center py-20">
+                <mat-spinner diameter="40" color="warn"></mat-spinner>
+            </div>
         }
 
         @if (!isLoading()) {
-        <div [class]="viewMode() === 'grid' ? 'responsive-grid' : 'flex flex-col gap-4'"
-            class="border-b border-gray-200 pb-8 transition-all duration-300">
-            @for (product of products(); track product.productId) {
-            <app-product-card [product]="product" [viewMode]="viewMode()">
-            </app-product-card>
-            }
-        </div>
+            <div [class]="viewMode() === 'grid' ? 'responsive-grid' : 'flex flex-col gap-4'"
+                class="border-b border-gray-200 pb-8 transition-all duration-300">
+                @for (product of products(); track product.productId) {
+                    <app-product-card [product]="product" [viewMode]="viewMode()"></app-product-card>
+                }
+            </div>
         }
 
-        <!-- Paginator -->
+        <!-- paginator -->
         @if (totalItems() > 0) {
         <div class="mt-4">
             <app-paginator [length]="totalItems()" [pageSize]="pageSize()" [pageIndex]="currentPage()"
@@ -68,15 +99,15 @@
         </div>
         }
 
-        <!-- Empty State -->
+        <!-- empty -->
         @if (!isLoading() && products().length === 0) {
         <div class="text-center py-10 flex flex-col items-center">
             <mat-icon class="text-gray-300 text-6xl mb-4 w-16! h-16!">search_off</mat-icon>
             <h3 class="text-lg font-medium text-gray-600">Nessun prodotto trovato</h3>
-            <p class="text-gray-400">Prova a cambiare categoria o filtri.</p>
-            <a routerLink="/products/category/all" class="mt-4 text-red-600 font-medium hover:underline cursor-pointer">
-                Visualizza tutti i prodotti
-            </a>
+            <p class="text-gray-400">Prova a cambiare categoria o rimuovere i filtri.</p>
+            <button (click)="resetAll()" class="mt-4 text-red-600 font-medium hover:underline cursor-pointer bg-transparent border-0">
+                Rimuovi tutti i filtri
+            </button>
         </div>
         }
 

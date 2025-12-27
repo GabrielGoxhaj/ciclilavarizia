@@ -90,4 +90,10 @@ export class ProductDetailComponent {
   updateQuantity(newQty: number) {
     this.quantity.set(newQty);
   }
+
+  productWithVat = computed(() => {
+    const p = this.product();
+    return p ? p.listPrice * 1.22 : 0;
+  });
+
 }

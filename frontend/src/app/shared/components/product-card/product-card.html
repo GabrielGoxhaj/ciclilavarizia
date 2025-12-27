@@ -1,116 +1,91 @@
-<!-- 
-  CONTAINER CARD
--->
-<div class="group relative bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 flex overflow-hidden h-full"
+<div class="group relative bg-white border border-gray-200 rounded-lg hover:border-gray-300 transition-all duration-200 flex overflow-hidden h-full box-border shadow-sm hover:shadow-md"
     [class.flex-col]="viewMode() === 'grid'" [class.flex-row]="viewMode() === 'list'"
-    [class.items-stretch]="viewMode() === 'list'" [class.min-h-[220px]]="viewMode() === 'list'">
+    [class.items-stretch]="viewMode() === 'list'">
 
-    <!-- LINK "FANTASMA" CHE COPRE TUTTA LA CARD -->
-    <!-- Importante: z-0 per stare sotto al bottone del carrello -->
     <a [routerLink]="['/products', product().productId]" class="absolute inset-0 z-0 focus:outline-none"
         aria-label="Vedi dettagli prodotto">
     </a>
 
-    <!-- 
-      SEZIONE IMMAGINE 
-      - Grid: bg-gray-100 leggermente più scuro come nello screen
-    -->
-    <div class="relative overflow-hidden bg-[#f7f7f7] shrink-0" [class.w-full]="viewMode() === 'grid'"
-        [class.pt-[100%]]="viewMode() === 'grid'" [class.w-56]="viewMode() === 'list'"
-        [class.self-stretch]="viewMode() === 'list'" [class.border-r]="viewMode() === 'list'"
-        [class.border-gray-200]="viewMode() === 'list'">
+    <div class="relative bg-white shrink-0 flex items-center justify-center overflow-hidden"
+        [class.w-full]="viewMode() === 'grid'" [class.aspect-square]="viewMode() === 'grid'"
+        [class.w-48]="viewMode() === 'list'" [class.h-full]="viewMode() === 'list'"
+        [class.border-r]="viewMode() === 'list'" [class.border-gray-100]="viewMode() === 'list'">
 
         <img [src]="imageUrl()" alt="{{ product().name }}" (error)="handleMissingImage($event)"
-            class="absolute top-0 left-0 w-full h-full object-contain p-0 transition-transform duration-500 group-hover:scale-105 mix-blend-multiply">
+            class="w-full h-full object-contain">
+
+        @if(!product().isAvailable) {
+        <div class="absolute inset-0 bg-white/60 backdrop-blur-[1px] flex items-center justify-center z-10">
+            <span
+                class="bg-gray-900 text-white text-[10px] uppercase tracking-wider font-bold px-2 py-1">Esaurito</span>
+        </div>
+        }
     </div>
 
-     <!-- @if(!product().isAvailable) {
-            <div class="absolute inset-0 flex items-center justify-center bg-white/60 z-10">
-                <span class="bg-gray-800 text-white text-xs font-bold px-2 py-1 rounded">ESAURITO</span>
-            </div>
-        } -->
+    <div class="flex flex-col flex-1 pointer-events-none p-4" [class.justify-between]="viewMode() === 'list'">
 
-    <!-- SEZIONE CONTENUTO -->
-    <!-- Pointer-events-none sul container per evitare conflitti, riattiviamo sul contenuto -->
-    <div class="flex flex-col flex-1 pointer-events-none" [class.p-4]="viewMode() === 'grid'"
-        [class.p-6]="viewMode() === 'list'" [class.justify-between]="viewMode() === 'list'">
-
-        <!-- MODALITÀ GRID (Layout Amazon: Prezzo -> Titolo -> Descrizione) -->
-        @if (viewMode() === 'grid') {
-        <div class="flex flex-col h-full pointer-events-auto">
-            <!-- Prezzo (Grande e in alto) -->
-            <div class="mb-1">
-                <span class="text-2xl font-medium text-gray-900 tracking-tight">
-                    {{ product().listPrice | currency:'EUR' }}
-                </span>
-                <!-- Esempio prezzo consigliato piccolo (opzionale) -->
-                <!-- <span class="text-xs text-gray-500 line-through ml-2">€ 20.00</span> -->
-            </div>
-
-            <!-- Titolo (Semplice e pulito) -->
+        <div>
             <h3
-                class="text-sm font-normal text-gray-700 leading-snug line-clamp-2 mb-2 group-hover:text-red-600 transition-colors">
+                class="text-base text-gray-900 font-medium leading-snug mb-1 group-hover:text-(--mat-sys-primary) group-hover:underline cursor-pointer pointer-events-auto line-clamp-2">
                 {{ product().name }}
             </h3>
 
-            <div class="mb-2">
-                    @if(product().isAvailable) {
-                        <span class="text-[11px] font-bold text-green-700">Disponibilità immediata</span>
-                    } @else {
-                        <span class="text-[11px] font-bold text-red-600">Non disponibile</span>
-                    }
-                </div>
-
-            <!-- Descrizione (Piccola, max 2 righe in griglia) -->
-            <p class="text-xs text-gray-500 line-clamp-4 mb-4">
-                {{ product().description || 'Nessuna descrizione disponibile.' }}
-            </p>
-
-            <!-- Spacer per spingere il bottone in basso -->
-            <div class="mt-auto pt-2 flex justify-end">
-                    <button mat-icon-button 
-                            [disabled]="!product().isAvailable"
-                            (click)="$event.preventDefault(); $event.stopPropagation(); cartService.addToCart(product())"
-                            color="warn" 
-                            class="relative z-20 !bg-gray-50 hover:!bg-red-50 border border-gray-200 hover:border-red-200 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
-                        <mat-icon [class.text-gray-400]="!product().isAvailable" [class.text-gray-600]="product().isAvailable">
-                            {{ product().isAvailable ? 'add_shopping_cart' : 'block' }}
-                        </mat-icon>
-                    </button>
-                </div>
-            </div>
-        
-        }
-
-        <!-- MODALITÀ LIST (Layout Classico: Titolo -> Descrizione -> Prezzo) -->
-        @if (viewMode() === 'list') {
-        <div class="flex flex-col h-full w-full pointer-events-auto">
-            <div>
-                <!-- Titolo -->
-                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-red-600 transition-colors">
-                    {{ product().name }}
-                </h3>
-
-                <!-- Descrizione completa -->
-                <p class="text-sm text-gray-600 mb-4 line-clamp-3">
-                    {{ product().description || 'Nessuna descrizione disponibile.' }}
-                </p>
-            </div>
-
-            <!-- Footer List Mode -->
-            <div class="mt-auto flex items-center justify-between border-t border-gray-100 pt-4">
-                <span class="text-2xl font-bold text-gray-900">
-                    {{ product().listPrice | currency:'EUR' }}
+            <div class="flex items-center gap-2 text-xs text-gray-500 mb-2">
+                @if(product().category) {
+                <span
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">
+                    {{ product().category }}
                 </span>
+                }
+            </div>
 
-                <button mat-flat-button color="warn"
-                    (click)="$event.preventDefault(); $event.stopPropagation(); cartService.addToCart(product())"
-                    class="relative z-20">
-                    <mat-icon>add_shopping_cart</mat-icon>
-                    Aggiungi
+            @if(product().description) {
+            <p class="text-xs text-gray-500 leading-relaxed mb-4" [class.line-clamp-2]="viewMode() === 'grid'"
+                [class.line-clamp-4]="viewMode() === 'list'">
+                {{ product().description }}
+            </p>
+            }
+        </div>
+
+        <div class="mt-auto">
+            <div class="mb-1 flex items-baseline gap-2">
+                <span class="text-xl font-bold text-gray-900">
+                    {{ productWithVat() | currency:'EUR' }}
+                </span>
+                <span class="text-[10px] text-gray-400 font-normal">IVA incl.</span>
+            </div>
+
+            <div class="flex items-center justify-between mt-2">
+
+                @if(product().isAvailable) {
+                <p class="text-[11px] font-medium text-emerald-700 flex items-center gap-1.5">
+                    <span class="relative flex h-2 w-2">
+                        <span
+                            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    Disponibile
+                </p>
+                } @else {
+                <p class="text-[11px] font-medium text-red-700 flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-red-600"></span>
+                    Non disponibile
+                </p>
+                }
+
+                <button mat-icon-button [disabled]="!product().isAvailable"
+                    (click)="$event.preventDefault(); $event.stopPropagation(); cartService.addToCart(product())" class="pointer-events-auto transition-transform duration-200 text-gray-700!
+               enabled:hover:scale-110 enabled:hover:text-(--mat-sys-primary)!
+               disabled:opacity-50 disabled:cursor-not-allowed">
+
+                    @if(product().isAvailable) {
+                    <mat-icon class="w-5! h-5! text-[20px]! leading-none">shopping_cart</mat-icon>
+                    } @else {
+                    <mat-icon class="w-5! h-5! text-[20px]! leading-none">block</mat-icon>
+                    }
                 </button>
             </div>
         </div>
-        }
+
     </div>
 </div>

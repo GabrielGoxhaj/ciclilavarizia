@@ -43,6 +43,7 @@ export interface ProductListItem {
   thumbnailUrl: string;
   isAvailable: boolean;
   description?: string;
+  category: string;
 }
 
 export interface ProductFilter {
