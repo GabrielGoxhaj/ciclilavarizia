@@ -30,7 +30,7 @@
                 {{ product().name }}
             </h3>
 
-            <div class="flex items-center gap-2 text-xs text-gray-500 mb-2">
+            <div class="flex items-center gap-2 text-xs text-gray-500 mb-1">
                 @if(product().category) {
                 <span
                     class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">
@@ -40,7 +40,7 @@
             </div>
 
             @if(product().description) {
-            <p class="text-xs text-gray-500 leading-relaxed mb-4" [class.line-clamp-2]="viewMode() === 'grid'"
+            <p class="text-xs text-gray-500 leading-relaxed mb-2" [class.line-clamp-2]="viewMode() === 'grid'"
                 [class.line-clamp-4]="viewMode() === 'list'">
                 {{ product().description }}
             </p>
@@ -55,7 +55,7 @@
                 <span class="text-[10px] text-gray-400 font-normal">IVA incl.</span>
             </div>
 
-            <div class="flex items-center justify-between mt-2">
+            <div class="flex items-center justify-between mt-1">
 
                 @if(product().isAvailable) {
                 <p class="text-[11px] font-medium text-emerald-700 flex items-center gap-1.5">
