@@ -80,7 +80,7 @@ export default class ProductListComponent {
 
   categoryName = signal<string>('');
   currentCategoryValue = computed(() => this.productCategoryId() || 'all');
-  viewMode = signal<'grid' | 'list'>('grid');
+  viewMode = signal<'grid' | 'list'>(this.getSavedViewMode());
   isSidebarCollapsed = signal(false);
   isLoading = signal(true);
 
@@ -110,12 +110,18 @@ export default class ProductListComponent {
   constructor() {
     effect(() => {
       const catId = this.productCategoryId();
-      untracked(() => { // cambia categoria, resetta filtri e pagina
+      untracked(() => {
+        // cambia categoria, resetta filtri e pagina
         this.currentFilters.set({});
         this.currentPage.set(1);
         this.loadProducts();
         this.resolveCategoryName();
       });
+    });
+
+    effect(() => {
+      const mode = this.viewMode();
+      localStorage.setItem('shop_view_mode', mode);
     });
   }
 
@@ -171,7 +177,7 @@ export default class ProductListComponent {
 
   onFilterChange(newFilters: Partial<ProductFilter>) {
     this.currentFilters.set(newFilters);
-    this.currentPage.set(1); 
+    this.currentPage.set(1);
     this.loadProducts();
   }
 
@@ -226,8 +232,13 @@ export default class ProductListComponent {
     delete current[chip.key];
 
     if (chip.key === 'minPrice') current.minPrice = undefined;
-    if (chip.key === 'maxPrice') current.maxPrice = undefined; 
+    if (chip.key === 'maxPrice') current.maxPrice = undefined;
 
     this.onFilterChange(current);
+  }
+
+  private getSavedViewMode(): 'grid' | 'list' {
+    const saved = localStorage.getItem('shop_view_mode');
+    return saved === 'grid' || saved === 'list' ? saved : 'grid';
   }
 }
