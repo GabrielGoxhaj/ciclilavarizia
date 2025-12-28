@@ -29,6 +29,7 @@ import { environment } from '../../../../environments/environment';
           (error)="handleMissingImage($event)"
           [alt]="item().name"
           class="w-24 h-24 rounded-lg object-contain border border-gray-100 bg-gray-50 hover:opacity-90 transition-opacity"
+          [style.view-transition-name]="'product-image-' + item().productId"
         />
       </a>
 

@@ -4,7 +4,7 @@ import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { ProductService } from '../../../shared/services/product.service';
+//import { ProductService } from '../../../shared/services/product.service'; // tolto per usare il resolver
 import { CartService } from '../../../shared/services/cart.service';
 import { Product } from '../../../shared/models/product.model';
 import { environment } from '../../../../environments/environment';
@@ -29,13 +29,12 @@ import { BackButton } from '../../../shared/components/back-button/back-button';
   templateUrl: './product-detail.html',
 })
 export class ProductDetailComponent {
-  private productService = inject(ProductService);
+  // private productService = inject(ProductService);
   public cartService = inject(CartService);
 
-  productId = input<string>();
-
-  product = signal<Product | null>(null);
-  isLoading = signal(true);
+  productData = input<Product | null>(null); // riceve i dati dal resolver
+  product = computed(() => this.productData());
+  isLoading = signal(false);
   quantity = signal(1);
 
   backRoute = computed(() => {
@@ -47,28 +46,11 @@ export class ProductDetailComponent {
   });
 
   constructor() {
-    effect(() => {
-      const productId = this.productId();
-      if (productId) {
-        untracked(() => {
-          this.loadProduct(Number(productId));
-        });
-      }
-    });
+    // L'effetto per caricare il prodotto è ora gestito dal resolver nelle rotte
   }
 
-  loadProduct(productId: number) {
-    this.isLoading.set(true);
-    this.productService.getProductById(productId).subscribe({
-      next: (res) => {
-        this.product.set(res.data || null);
-        this.isLoading.set(false);
-      },
-      error: (err) => {
-        console.error(err);
-        this.isLoading.set(false);
-      },
-    });
+  ngOnInit() {
+    // console.log('Dati dal resolver:', this.productData()); // debug
   }
 
   private backendHost = environment.apiUrl.replace('/api', '');
@@ -95,5 +77,4 @@ export class ProductDetailComponent {
     const p = this.product();
     return p ? p.listPrice * 1.22 : 0;
   });
-
 }

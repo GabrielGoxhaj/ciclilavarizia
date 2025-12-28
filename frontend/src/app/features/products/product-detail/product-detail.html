@@ -9,7 +9,7 @@
     @if (product(); as p) {
     <div class="mb-6">
         <app-back-button [navigateTo]="backRoute()">
-            Torna Alla Categoria {{ p.category?.name || 'Products' | titlecase }}
+            Vai Alla Categoria {{ p.category?.name || 'Products' | titlecase }}
         </app-back-button>
     </div>
 
@@ -21,7 +21,7 @@
                 (error)="handleMissingImage($event)"
                 [alt]="p.name"
                 class="w-full h-auto max-h-150 object-contain"
-                style="view-transition-name: product-image" 
+                [style.view-transition-name]="'product-image-' + p.productId" 
             />
         </div>
 

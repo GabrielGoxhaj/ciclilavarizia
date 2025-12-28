@@ -12,7 +12,7 @@
         [class.border-r]="viewMode() === 'list'" [class.border-gray-100]="viewMode() === 'list'">
 
         <img [src]="imageUrl()" alt="{{ product().name }}" (error)="handleMissingImage($event)"
-            class="w-full h-full object-contain">
+            class="w-full h-full object-contain" [style.view-transition-name]="'product-image-' + product().productId" />
 
         @if(!product().isAvailable) {
         <div class="absolute inset-0 bg-white/60 backdrop-blur-[1px] flex items-center justify-center z-10">

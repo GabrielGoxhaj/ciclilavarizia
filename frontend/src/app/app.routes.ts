@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { productResolver } from './core/resolvers/product.resolver';
 
 export const routes: Routes = [
   { path: '', loadComponent: () => import('./pages/home/home').then((m) => m.HomeComponent) },
@@ -12,7 +13,9 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/products/product-detail/product-detail').then(
         (m) => m.ProductDetailComponent
-      ),
+      ),resolve: {
+      productData: productResolver 
+    }
   },
     {
     path: 'signup',

@@ -41,7 +41,7 @@ export const appConfig: ApplicationConfig = {
       withComponentInputBinding(),
       withViewTransitions(),
       withRouterConfig({
-        scrollPositionRestoration: 'enabled',
+        scrollPositionRestoration: 'disabled',
         anchorScrolling: 'enabled',
         scrollOffset: [0, 0],
       } as any)

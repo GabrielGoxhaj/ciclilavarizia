@@ -144,3 +144,20 @@ body {
 .p-toast .p-toast-icon-close-icon {
     font-size: 1rem;
 }
+
+/* transitions */
+::view-transition-old(root), /* keep size */
+::view-transition-new(root) {
+  animation-duration: 0.4s; 
+}
+
+::view-transition-group(*) {
+  animation-timing-function: ease-in-out;
+}
+
+::view-transition-old(*),
+::view-transition-new(*) {
+    object-fit: contain;
+    height: 100%;
+    width: 100%;
+}
