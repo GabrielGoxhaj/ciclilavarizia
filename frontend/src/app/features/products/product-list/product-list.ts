@@ -6,10 +6,10 @@ import {
   signal,
   computed,
   untracked,
-  ViewChild,
+  OnInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute, Params } from '@angular/router';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -72,12 +72,12 @@ interface FilterChip {
     `,
   ],
 })
-export default class ProductListComponent {
+export default class ProductListComponent implements OnInit {
   private productService = inject(ProductService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   productCategoryId = input<string>();
-
   categoryName = signal<string>('');
   currentCategoryValue = computed(() => this.productCategoryId() || 'all');
   viewMode = signal<'grid' | 'list'>(this.getSavedViewMode());
@@ -96,6 +96,8 @@ export default class ProductListComponent {
   // current applied filters
   currentFilters = signal<Partial<ProductFilter>>({});
 
+  private readonly VAT_RATE = 1.22; // 22% IVA
+
   activeFiltersCount = computed(() => {
     const f = this.currentFilters();
     let count = 0;
@@ -109,19 +111,59 @@ export default class ProductListComponent {
 
   constructor() {
     effect(() => {
-      const catId = this.productCategoryId();
+      const catId = this.productCategoryId(); // quando cambia la categoria
       untracked(() => {
-        // cambia categoria, resetta filtri e pagina
-        this.currentFilters.set({});
+        this.resolveCategoryName();
         this.currentPage.set(1);
         this.loadProducts();
-        this.resolveCategoryName();
       });
     });
 
     effect(() => {
       const mode = this.viewMode();
       localStorage.setItem('shop_view_mode', mode);
+    });
+  }
+  ngOnInit(): void {
+    // filters from query params
+    this.route.queryParams.subscribe((params) => {
+      this.parseParams(params);
+      this.loadProducts();
+    });
+  }
+
+  // legge i parametri dall'URL e aggiorna i Signal locali
+  private parseParams(params: Params) {
+    const filters: Partial<ProductFilter> = {};
+
+    if (params['search']) filters.search = params['search'];
+    if (params['minPrice']) filters.minPrice = Number(params['minPrice']);
+    if (params['maxPrice']) filters.maxPrice = Number(params['maxPrice']);
+    if (params['color']) filters.color = params['color'];
+    if (params['size']) filters.size = params['size'];
+
+    // aggiorna paginazione e ordinamento se presenti nell'URL
+    if (params['page']) this.currentPage.set(Number(params['page']));
+    if (params['sort']) this.currentSort.set(params['sort']);
+
+    this.currentFilters.set(filters);
+  }
+
+  private updateUrl(filters: Partial<ProductFilter>, page: number, sort: string) {
+    const queryParams: Params = {
+      search: filters.search || null,
+      minPrice: filters.minPrice && filters.minPrice > 0 ? filters.minPrice : null,
+      maxPrice: filters.maxPrice && filters.maxPrice < 3500 ? filters.maxPrice : null,
+      color: filters.color || null,
+      size: filters.size || null,
+      page: page > 1 ? page : null, // nascondi page=1
+      sort: sort !== 'name_asc' ? sort : null, // nascondi sort default
+    };
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: queryParams,
+      queryParamsHandling: 'merge', // mantiene altri parametri non sovrascritti
     });
   }
 
@@ -145,15 +187,20 @@ export default class ProductListComponent {
     this.isLoading.set(true);
     const catValue = this.currentCategoryValue();
     const isNumericCat = !isNaN(Number(catValue));
-
     const filters = this.currentFilters();
+
+    // conversione prezzi da lordo a netto per backend
+    const minPriceNet = filters.minPrice ? filters.minPrice / this.VAT_RATE : undefined;
+    const maxPriceNet = filters.maxPrice ? filters.maxPrice / this.VAT_RATE : undefined;
 
     const requestFilter: ProductFilter = {
       page: this.currentPage(),
       pageSize: this.pageSize(),
       categoryId: isNumericCat ? Number(catValue) : undefined,
       sort: this.currentSort(),
-      ...filters, // Spread operator per aggiungere search, price, color, size
+      ...filters, // spread operator per copiare gli altri filtri (search, color...)
+      minPrice: minPriceNet,
+      maxPrice: maxPriceNet,
     };
 
     this.productService.getProducts(requestFilter).subscribe({
@@ -176,20 +223,15 @@ export default class ProductListComponent {
   }
 
   onFilterChange(newFilters: Partial<ProductFilter>) {
-    this.currentFilters.set(newFilters);
-    this.currentPage.set(1);
-    this.loadProducts();
+    this.updateUrl(newFilters, 1, this.currentSort());
   }
 
   onSortChange(sortValue: string) {
-    this.currentSort.set(sortValue);
-    this.loadProducts();
+    this.updateUrl(this.currentFilters(), this.currentPage(), sortValue);
   }
 
   onPageChange(event: PaginatorState): void {
-    this.currentPage.set(event.pageIndex);
-    this.pageSize.set(event.pageSize);
-    this.loadProducts();
+    this.updateUrl(this.currentFilters(), event.pageIndex, this.currentSort());
     setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 0);
   }
 
@@ -198,42 +240,45 @@ export default class ProductListComponent {
   }
 
   resetAll() {
-    // ricarica tutto e resetta grazie all'effect
-    this.router.navigate(['/products/category', this.currentCategoryValue()]);
+    // naviga pulendo i query params
+    this.router.navigate(['/products/category', this.currentCategoryValue()], { queryParams: {} });
   }
 
   activeFiltersList = computed<FilterChip[]>(() => {
     const f = this.currentFilters();
     const chips: FilterChip[] = [];
-
-    if (f.search) {
-      chips.push({ key: 'search', label: `Cerca: "${f.search}"`, value: f.search });
+    if (this.currentCategoryValue() !== 'all') {
+      chips.push({
+        key: 'category' as any,
+        label: `Categoria: ${this.categoryName()}`,
+        value: this.currentCategoryValue(),
+      });
     }
-    if (f.minPrice && f.minPrice > 0) {
+    if (f.search) chips.push({ key: 'search', label: `Cerca: "${f.search}"`, value: f.search });
+    if (f.minPrice && f.minPrice > 0)
       chips.push({ key: 'minPrice', label: `Min: €${f.minPrice}`, value: f.minPrice });
-    }
-    if (f.maxPrice && f.maxPrice < 3500) {
+    if (f.maxPrice && f.maxPrice < 3500)
       chips.push({ key: 'maxPrice', label: `Max: €${f.maxPrice}`, value: f.maxPrice });
-    }
-    if (f.color) {
-      chips.push({ key: 'color', label: `Colore: ${f.color}`, value: f.color });
-    }
-    if (f.size) {
-      chips.push({ key: 'size', label: `Taglia: ${f.size}`, value: f.size });
-    }
+    if (f.color) chips.push({ key: 'color', label: `Colore: ${f.color}`, value: f.color });
+    if (f.size) chips.push({ key: 'size', label: `Taglia: ${f.size}`, value: f.size });
 
     return chips;
   });
 
   // for removing single filter chip
   removeFilter(chip: FilterChip) {
-    const current = { ...this.currentFilters() };
+    if (chip.key === ('category' as any)) {
+      this.router.navigate(['/products/category/all'], { queryParamsHandling: 'preserve' });
+      return;
+    }
 
+    const current = { ...this.currentFilters() };
     delete current[chip.key];
 
     if (chip.key === 'minPrice') current.minPrice = undefined;
     if (chip.key === 'maxPrice') current.maxPrice = undefined;
 
+    // chiama updateUrl invece di loadProducts diretto
     this.onFilterChange(current);
   }
 
