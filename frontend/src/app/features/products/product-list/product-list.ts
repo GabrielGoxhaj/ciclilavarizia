@@ -103,7 +103,7 @@ export default class ProductListComponent implements OnInit {
     let count = 0;
     if (f.search) count++;
     if (f.minPrice && f.minPrice > 0) count++;
-    if (f.maxPrice && f.maxPrice < 3500) count++;
+    if (f.maxPrice && f.maxPrice < 4500) count++;
     if (f.color) count++;
     if (f.size) count++;
     return count;
@@ -153,7 +153,7 @@ export default class ProductListComponent implements OnInit {
     const queryParams: Params = {
       search: filters.search || null,
       minPrice: filters.minPrice && filters.minPrice > 0 ? filters.minPrice : null,
-      maxPrice: filters.maxPrice && filters.maxPrice < 3500 ? filters.maxPrice : null,
+      maxPrice: filters.maxPrice && filters.maxPrice < 4500 ? filters.maxPrice : null,
       color: filters.color || null,
       size: filters.size || null,
       page: page > 1 ? page : null, // nascondi page=1
@@ -257,7 +257,7 @@ export default class ProductListComponent implements OnInit {
     if (f.search) chips.push({ key: 'search', label: `Cerca: "${f.search}"`, value: f.search });
     if (f.minPrice && f.minPrice > 0)
       chips.push({ key: 'minPrice', label: `Min: €${f.minPrice}`, value: f.minPrice });
-    if (f.maxPrice && f.maxPrice < 3500)
+    if (f.maxPrice && f.maxPrice < 4500)
       chips.push({ key: 'maxPrice', label: `Max: €${f.maxPrice}`, value: f.maxPrice });
     if (f.color) chips.push({ key: 'color', label: `Colore: ${f.color}`, value: f.color });
     if (f.size) chips.push({ key: 'size', label: `Taglia: ${f.size}`, value: f.size });

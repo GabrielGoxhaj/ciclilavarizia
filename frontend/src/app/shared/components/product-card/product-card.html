@@ -25,19 +25,22 @@
     <div class="flex flex-col flex-1 pointer-events-none p-4" [class.justify-between]="viewMode() === 'list'">
 
         <div>
-            <h3
-                class="text-base text-gray-900 font-medium leading-snug mb-1 group-hover:text-(--mat-sys-primary) group-hover:underline cursor-pointer pointer-events-auto line-clamp-2">
-                {{ product().name }}
-            </h3>
-
-            <div class="flex items-center gap-2 text-xs text-gray-500 mb-1">
-                @if(product().category) {
-                <span
-                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">
-                    {{ product().category }}
-                </span>
-                }
+            <div [class.flex]="viewMode() === 'list'" [class.justify-between]="viewMode() === 'list'" [class.items-start]="viewMode() === 'list'" [class.gap-4]="viewMode() === 'list'">
+                <h3
+                    class="text-base text-gray-900 font-medium leading-snug mb-1 group-hover:text-(--mat-sys-primary) group-hover:underline cursor-pointer pointer-events-auto line-clamp-2">
+                    {{ product().name }}
+                </h3>
+                <div class="flex items-center gap-2 text-xs text-gray-500" 
+                     [class.mb-2]="viewMode() === 'grid'" 
+                     [class.shrink-0]="viewMode() === 'list'">
+                    @if(product().category) {
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-600 border border-slate-200 whitespace-nowrap">
+                        {{ product().category }}
+                    </span>
+                    }
+                </div>
             </div>
+
 
             @if(product().description) {
             <p class="text-xs text-gray-500 leading-relaxed mb-2" [class.line-clamp-2]="viewMode() === 'grid'"

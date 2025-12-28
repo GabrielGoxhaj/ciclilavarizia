@@ -93,7 +93,7 @@ interface CategoryGroup {
               </div>
               <mat-slider
                 min="0"
-                max="3500"
+                max="4500"
                 step="50"
                 showTickMarks
                 discrete
@@ -240,7 +240,7 @@ export class CategorySidebarComponent implements OnInit {
   filterForm = this.fb.group({
     search: [''],
     minPrice: [0],
-    maxPrice: [3500],
+    maxPrice: [4500],
     color: [''],
     size: [''],
   });
@@ -254,7 +254,7 @@ export class CategorySidebarComponent implements OnInit {
           {
             search: externalFilters.search || '',
             minPrice: externalFilters.minPrice ?? 0,
-            maxPrice: externalFilters.maxPrice ?? 3500,
+            maxPrice: externalFilters.maxPrice ?? 4500,
             color: externalFilters.color || '',
             size: externalFilters.size || '',
           },
@@ -293,7 +293,7 @@ export class CategorySidebarComponent implements OnInit {
     this.filterChange.emit({
       search,
       minPrice: val.minPrice || undefined,
-      maxPrice: val.maxPrice === 3500 ? undefined : val.maxPrice || undefined,
+      maxPrice: val.maxPrice === 4500 ? undefined : val.maxPrice || undefined,
       color,
       size,
     });
@@ -303,7 +303,7 @@ export class CategorySidebarComponent implements OnInit {
     this.filterForm.patchValue({
       search: '',
       minPrice: 0,
-      maxPrice: 3500,
+      maxPrice: 4500,
       color: '',
       size: '',
     });
