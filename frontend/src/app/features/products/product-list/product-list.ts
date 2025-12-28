@@ -114,7 +114,7 @@ export default class ProductListComponent implements OnInit {
       const catId = this.productCategoryId(); // quando cambia la categoria
       untracked(() => {
         this.resolveCategoryName();
-        this.currentPage.set(1);
+        //this.currentPage.set(1);
         this.loadProducts();
       });
     });
@@ -145,11 +145,12 @@ export default class ProductListComponent implements OnInit {
     // aggiorna paginazione e ordinamento se presenti nell'URL
     if (params['page']) this.currentPage.set(Number(params['page']));
     if (params['sort']) this.currentSort.set(params['sort']);
+    if (params['pageSize']) this.pageSize.set(Number(params['pageSize']));
 
     this.currentFilters.set(filters);
   }
 
-  private updateUrl(filters: Partial<ProductFilter>, page: number, sort: string) {
+  private updateUrl(filters: Partial<ProductFilter>, page: number, sort: string, pageSize: number) {
     const queryParams: Params = {
       search: filters.search || null,
       minPrice: filters.minPrice && filters.minPrice > 0 ? filters.minPrice : null,
@@ -158,6 +159,7 @@ export default class ProductListComponent implements OnInit {
       size: filters.size || null,
       page: page > 1 ? page : null, // nascondi page=1
       sort: sort !== 'name_asc' ? sort : null, // nascondi sort default
+      pageSize: pageSize !== 20 ? pageSize : null, 
     };
 
     this.router.navigate([], {
@@ -223,15 +225,15 @@ export default class ProductListComponent implements OnInit {
   }
 
   onFilterChange(newFilters: Partial<ProductFilter>) {
-    this.updateUrl(newFilters, 1, this.currentSort());
+    this.updateUrl(newFilters, 1, this.currentSort(), this.pageSize());
   }
 
   onSortChange(sortValue: string) {
-    this.updateUrl(this.currentFilters(), this.currentPage(), sortValue);
+    this.updateUrl(this.currentFilters(), this.currentPage(), sortValue, this.pageSize());
   }
 
   onPageChange(event: PaginatorState): void {
-    this.updateUrl(this.currentFilters(), event.pageIndex, this.currentSort());
+    this.updateUrl(this.currentFilters(), event.pageIndex, this.currentSort(), event.pageSize);
     setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 0);
   }
 
