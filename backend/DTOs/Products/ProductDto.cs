@@ -17,7 +17,6 @@
         public ProductCategoryDto? Category { get; set; }
         public int? ProductModelId { get; set; }
         public ProductModelDto? Model { get; set; }
-
         public ProductDescriptionDto? Description { get; set; }
     }
 }
