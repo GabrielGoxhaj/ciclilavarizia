@@ -143,8 +143,8 @@ export default class ProductListComponent implements OnInit {
     if (params['size']) filters.size = params['size'];
 
     // aggiorna paginazione e ordinamento se presenti nell'URL
-    if (params['page']) this.currentPage.set(Number(params['page']));
-    if (params['sort']) this.currentSort.set(params['sort']);
+    this.currentPage.set(Number(params['page']) || 1); 
+    this.currentSort.set(params['sort'] || 'name_asc');
     if (params['pageSize']) this.pageSize.set(Number(params['pageSize']));
 
     this.currentFilters.set(filters);
@@ -229,7 +229,7 @@ export default class ProductListComponent implements OnInit {
   }
 
   onSortChange(sortValue: string) {
-    this.updateUrl(this.currentFilters(), this.currentPage(), sortValue, this.pageSize());
+    this.updateUrl(this.currentFilters(), 1, sortValue, this.pageSize());
   }
 
   onPageChange(event: PaginatorState): void {
