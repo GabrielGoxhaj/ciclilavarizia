@@ -67,8 +67,8 @@
                 <mat-button-toggle-group [value]="viewMode()" (change)="viewMode.set($event.value)"
                     hideSingleSelectionIndicator="true"
                     class="bg-white border border-gray-200 rounded-lg shadow-sm h-10 items-center">
-                    <mat-button-toggle value="grid" aria-label="Griglia" class="px-3!"><mat-icon>grid_view</mat-icon></mat-button-toggle>
-                    <mat-button-toggle value="list" aria-label="Elenco" class="px-3!"><mat-icon>view_list</mat-icon></mat-button-toggle>
+                    <mat-button-toggle value="grid" aria-label="Griglia" class="px-3!" matTooltip="Vista Galleria"><mat-icon>grid_view</mat-icon></mat-button-toggle>
+                    <mat-button-toggle value="list" aria-label="Elenco" class="px-3!" matTooltip="Vista Elenco"><mat-icon>view_list</mat-icon></mat-button-toggle>
                 </mat-button-toggle-group>
 
             </div>
