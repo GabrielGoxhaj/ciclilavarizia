@@ -12,6 +12,7 @@ export interface CreateOrderRequest {
 export interface OrderDetail {
   productId: number;
   productName: string;
+  thumbnailUrl?: string;
   quantity: number;
   unitPrice: number;
   discount: number;

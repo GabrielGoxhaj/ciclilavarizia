@@ -38,7 +38,7 @@ body {
 }
 
 /* icon button form field reset */
-.mat-mdc-icon-button {
+.mat-mdc-form-field .mat-mdc-icon-button {
     padding: 0 !important;
     display: flex;
     align-items: center;

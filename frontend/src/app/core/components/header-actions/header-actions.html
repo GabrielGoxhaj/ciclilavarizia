@@ -17,10 +17,15 @@
       <span class="text-xs text-gray-500">{{ user.email }}</span>
     </div>
     <mat-divider></mat-divider>
-    <button mat-menu-item routerLink="/features/orders">
-      <mat-icon>list_alt</mat-icon>
+    <button mat-menu-item routerLink="/profile/details">
+      <mat-icon>person</mat-icon>
+      <span>Il mio profilo</span>
+    </button>
+    <button mat-menu-item routerLink="/profile/orders">
+      <mat-icon>shopping_bag</mat-icon> 
       <span>I miei ordini</span>
     </button>
+    <mat-divider></mat-divider>
     <button mat-menu-item (click)="logout()">
       <mat-icon>logout</mat-icon>
       <span>Esci</span>

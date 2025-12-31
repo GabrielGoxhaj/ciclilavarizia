@@ -1,8 +1,34 @@
 import { Routes } from '@angular/router';
 import { productResolver } from './core/resolvers/product.resolver';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   { path: '', loadComponent: () => import('./pages/home/home').then((m) => m.HomeComponent) },
+  {
+    path: 'profile',
+    canActivate: [authGuard], 
+    loadComponent: () =>
+      import('./features/profile/profile-layout/profile-layout').then(
+        (m) => m.ProfileLayoutComponent
+      ),
+    children: [
+      { path: '', redirectTo: 'orders', pathMatch: 'full' }, // default: orders
+      {
+        path: 'orders',
+        loadComponent: () =>
+          import('./features/profile/order-history/order-history').then(
+            (m) => m.OrderHistoryComponent
+          ),
+      },
+      {
+        path: 'orders/:id',
+        loadComponent: () =>
+          import('./features/profile/order-detail/order-detail').then(
+            (m) => m.OrderDetailComponent
+          ),
+      },
+    ],
+  },
   { path: 'products', redirectTo: 'products/category/all', pathMatch: 'full' },
   {
     path: 'products/category/:productCategoryId',
@@ -13,16 +39,14 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/products/product-detail/product-detail').then(
         (m) => m.ProductDetailComponent
-      ),resolve: {
-      productData: productResolver 
-    }
-  },
-    {
-    path: 'signup',
-    loadComponent: () =>
-      import('./features/auth/sign-up/sign-up').then(
-        (m) => m.SignUpComponent
       ),
+    resolve: {
+      productData: productResolver,
+    },
+  },
+  {
+    path: 'signup',
+    loadComponent: () => import('./features/auth/sign-up/sign-up').then((m) => m.SignUpComponent),
   },
   {
     path: 'cart',
