@@ -6,6 +6,7 @@ using Humanizer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using static NuGet.Packaging.PackagingConstants;
 
 namespace backend.Controllers
 {
@@ -45,7 +46,7 @@ namespace backend.Controllers
             var securityUserId = GetUserId();
             var customerId = await _customerService.GetCustomerIdBySecurityIdAsync(securityUserId);
             var orders = await _queryService.GetMyOrdersAsync(customerId);
-            return Ok(orders);
+            return Ok(ApiResponse<List<OrderDto>>.Success(orders));
         }
 
         // GET MY ORDER BY ID (USER)
@@ -60,7 +61,7 @@ namespace backend.Controllers
             if (order == null)
                 return NotFound("Order not found");
 
-            return Ok(order);
+            return Ok(ApiResponse<OrderDto>.Success(order));
         }
 
         // ADMIN: GET ALL ORDERS

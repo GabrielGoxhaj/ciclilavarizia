@@ -170,6 +170,7 @@ namespace backend.Services
                 SalesOrderId = order.SalesOrderId,
                 CustomerId = order.CustomerId,
                 OrderDate = order.OrderDate,
+                Status = order.Status,
                 SubTotal = order.SubTotal,
                 TaxAmt = order.TaxAmt,
                 Freight = order.Freight,
@@ -178,6 +179,7 @@ namespace backend.Services
                 {
                     ProductId = d.ProductId,
                     ProductName = d.Product.Name,
+                    ThumbnailUrl = $"/images/products/{d.Product.ThumbnailPhotoFileName}",
                     Quantity = d.OrderQty,
                     UnitPrice = d.UnitPrice,
                     Discount = d.UnitPriceDiscount,
