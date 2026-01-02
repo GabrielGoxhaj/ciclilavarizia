@@ -16,7 +16,7 @@ namespace backend.DTOs.Customers
         public string? Email { get; set; }
 
         [Phone]
-        [MaxLength(20)]
+        [MaxLength(25)]
         public string? Phone { get; set; }
     }
 }

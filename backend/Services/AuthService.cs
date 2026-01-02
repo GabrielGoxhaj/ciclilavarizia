@@ -45,10 +45,10 @@ namespace backend.Services
         public async Task<int> CreateCredentialsAsync(CustomerRegistrationDto dto) // email e username univoci.
         {
             if (await _context.Users.AnyAsync(u => u.Email == dto.Email))
-                throw new Exception("Email already exists in Security DB.");
+                throw new Exception("Email già in uso, effettua il login.");
 
             if (await _context.Users.AnyAsync(u => u.Username == dto.Username))
-                throw new Exception($"Username '{dto.Username}' already exists in Security DB.");
+                throw new Exception($"Username '{dto.Username}' già in uso.");
 
             PasswordHasher.CreateHash(dto.Password, out byte[] passwordHash, out byte[] passwordSalt);
 
@@ -101,6 +101,48 @@ namespace backend.Services
                 },
                 "Login successful"
             );
+        }
+
+        public async Task UpdateLoginCredentialsAsync(int userId, string newEmail, string newUsername)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null) throw new Exception("User not found");
+
+            if (user.Email != newEmail)
+            {
+                bool emailExists = await _context.Users.AnyAsync(u => u.Email == newEmail && u.Id != userId);
+                if (emailExists) throw new Exception("Email already in use.");
+                user.Email = newEmail;
+            }
+
+            if (user.Username != newUsername)
+            {
+                bool userExists = await _context.Users.AnyAsync(u => u.Username == newUsername && u.Id != userId);
+                if (userExists) throw new Exception("Username already in use.");
+                user.Username = newUsername;
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<bool> ChangePasswordAsync(int userId, string oldPassword, string newPassword)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null) throw new Exception("User not found");
+
+            if (!PasswordHasher.Verify(oldPassword, user.PasswordHash, user.PasswordSalt))
+            {
+                return false; 
+            }
+
+            // hash nuova password
+            PasswordHasher.CreateHash(newPassword, out byte[] hash, out byte[] salt);
+
+            user.PasswordHash = hash;
+            user.PasswordSalt = salt;
+
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

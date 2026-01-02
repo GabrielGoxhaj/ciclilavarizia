@@ -13,7 +13,10 @@ namespace backend.Services.Interfaces
         Task<ApiResponse<CustomerDto>> UpdateCustomerAsync(int id, CustomerUpdateDto dto);
         Task<ApiResponse<string>> DeleteCustomerAsync(int id);
         Task<int> GetCustomerIdBySecurityIdAsync(int securityUserId);
+        Task UpdateCustomerDetailsAsync(int securityUserId, string firstName, string lastName, string email, string phone, string companyName);
         Task<AddressDto> AddAddressAsync(int customerId, CreateAddressDto dto);
         Task<List<AddressDto>> GetAddressesByCustomerIdAsync(int customerId);
+        Task<AddressDto> UpdateAddressAsync(int customerId, int addressId, AddressDto dto);
+        Task<bool> DeleteAddressAsync(int customerId, int addressId);
     }
 }

@@ -21,18 +21,64 @@ namespace backend.Services
         {
             using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                var securityDto = new UserRegisterDto
+                try
                 {
-                    Username = dto.Username,
-                    Email = dto.Email!,
-                    Password = dto.Password
-                };
+                    int newSecurityUserId = await _authService.CreateCredentialsAsync(dto);
 
-                int newSecurityUserId = await _authService.CreateCredentialsAsync(dto);
-                await _customerService.CreateOrUpdateCustomerProfileAsync(dto, newSecurityUserId);
-                //throw new Exception("debug");
-                scope.Complete();
-                return ApiResponse<string>.Success("Registration completed");
+                    await _customerService.CreateOrUpdateCustomerProfileAsync(dto, newSecurityUserId);
+
+                    scope.Complete();
+                    return ApiResponse<string>.Success("Registration completed");
+                }
+                catch (Exception ex)
+                {
+                    return ApiResponse<string>.Fail(ex.Message);
+                }
+            }
+        }
+
+        public async Task<ApiResponse<string>> UpdateUserProfileAsync(int securityUserId, UpdateProfileDto dto)
+        {
+            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                try
+                {
+                    await _authService.UpdateLoginCredentialsAsync(securityUserId, dto.Email, dto.Username);
+
+                    await _customerService.UpdateCustomerDetailsAsync(
+                        securityUserId,  
+                        dto.FirstName,
+                        dto.LastName,
+                        dto.Email,
+                        dto.Phone,
+                        dto.CompanyName
+                    );
+
+                    scope.Complete();
+                    return ApiResponse<string>.Success("Profile updated successfully");
+                }
+                catch (Exception ex)
+                {
+                    return ApiResponse<string>.Fail(ex.Message);
+                }
+            }
+        }
+
+        public async Task<ApiResponse<string>> ChangePasswordAsync(int userId, ChangePasswordDto dto)
+        {
+            if (dto.NewPassword != dto.ConfirmNewPassword)
+                return ApiResponse<string>.Fail("New passwords do not match.");
+
+            try
+            {
+                var success = await _authService.ChangePasswordAsync(userId, dto.OldPassword, dto.NewPassword);
+                if (!success) return ApiResponse<string>.Fail("Incorrect old password.");
+
+                return ApiResponse<string>.Success("Password changed successfully.");
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<string>.Fail(ex.Message);
             }
         }
 

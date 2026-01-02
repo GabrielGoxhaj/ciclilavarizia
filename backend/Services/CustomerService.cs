@@ -1,11 +1,13 @@
 ﻿using backend.Data;
 using backend.DTOs.Address;
+using backend.DTOs.Auth;
 using backend.DTOs.Customers;
 using backend.DTOs.Orders;
 using backend.DTOs.Response;
 using backend.Models;
 using backend.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Security;
 
 namespace backend.Services
 {
@@ -31,6 +33,8 @@ namespace backend.Services
                    .Select(c => new CustomerDto
                    {
                        CustomerId = c.CustomerId,
+                       FirstName = c.FirstName,
+                       LastName = c.LastName,
                        FullName = $"{c.FirstName} {c.LastName}",
                        Email = c.EmailAddress,
                        Phone = c.Phone,
@@ -74,6 +78,8 @@ namespace backend.Services
             var dto = new CustomerDto
             {
                 CustomerId = customer.CustomerId,
+                FirstName = customer.FirstName,
+                LastName = customer.LastName,
                 FullName = $"{customer.FirstName} {customer.LastName}",
                 Email = customer.EmailAddress,
                 Phone = customer.Phone,
@@ -173,7 +179,7 @@ namespace backend.Services
                     LastName = dto.LastName,
                     EmailAddress = dto.Email,
                     Phone = dto.Phone,
-                    FkUserLogins = securityUserId, 
+                    FkUserLogins = securityUserId,
                     ModifiedDate = DateTime.UtcNow,
                     Rowguid = Guid.NewGuid()
                 };
@@ -182,7 +188,7 @@ namespace backend.Services
             }
 
             // gestione addresses, se forniti durante la registrazione
-            if (dto.Addresses != null && dto.Addresses.Any()) 
+            if (dto.Addresses != null && dto.Addresses.Any())
             {
                 foreach (var addrDto in dto.Addresses)
                 {
@@ -285,7 +291,7 @@ namespace backend.Services
             var customerAddress = new CustomerAddress
             {
                 CustomerId = customerId,
-                Address = newAddress, 
+                Address = newAddress,
                 AddressType = "Shipping",
                 Rowguid = Guid.NewGuid(),
                 ModifiedDate = DateTime.UtcNow
@@ -327,6 +333,82 @@ namespace backend.Services
                 .ToListAsync();
 
             return addresses;
+        }
+
+        public async Task UpdateCustomerDetailsAsync(int securityUserId, string firstName, string lastName, string email, string phone, string companyName)
+        {
+            var customer = await _context.Customers
+                .FirstOrDefaultAsync(c => c.FkUserLogins == securityUserId);
+
+            if (customer == null)
+            {
+                throw new Exception($"Customer profile not found for security ID {securityUserId}");
+            }
+
+            customer.FirstName = firstName;
+            customer.LastName = lastName;
+            customer.EmailAddress = email;
+            customer.Phone = phone;
+            customer.CompanyName = companyName;
+            customer.ModifiedDate = DateTime.UtcNow;
+
+            _context.Customers.Update(customer);
+            await _context.SaveChangesAsync();
+        }
+
+    public async Task<AddressDto> UpdateAddressAsync(int customerId, int addressId, AddressDto dto)
+        {
+            // verifica di sicurezza - controllo appertenenza indirizzo al cliente
+            var customerAddress = await _context.CustomerAddresses
+                .Include(ca => ca.Address)
+                .FirstOrDefaultAsync(ca => ca.CustomerId == customerId && ca.Address.AddressId == addressId);
+
+            if (customerAddress == null)
+                throw new Exception("Address not found or does not belong to this user.");
+
+            var address = customerAddress.Address;
+            address.AddressLine1 = dto.AddressLine1;
+            address.AddressLine2 = dto.AddressLine2;
+            address.City = dto.City;
+            address.StateProvince = dto.StateProvince;
+            address.CountryRegion = dto.CountryRegion;
+            address.PostalCode = dto.PostalCode;
+            address.ModifiedDate = DateTime.UtcNow;
+
+            // aggiornare tipo se necessario... salvato nella tabella di join
+            // customerAddress.AddressType = dto.AddressType ?? "Shipping"; 
+
+            await _context.SaveChangesAsync();
+
+            return new AddressDto
+            {
+                AddressId = address.AddressId,
+                AddressLine1 = address.AddressLine1,
+                AddressLine2 = address.AddressLine2,
+                City = address.City,
+                StateProvince = address.StateProvince,
+                CountryRegion = address.CountryRegion,
+                PostalCode = address.PostalCode,
+                AddressType = customerAddress.AddressType
+            };
+        }
+
+        public async Task<bool> DeleteAddressAsync(int customerId, int addressId)
+        {
+            // collegamento
+            var customerAddress = await _context.CustomerAddresses
+                .FirstOrDefaultAsync(ca => ca.CustomerId == customerId && ca.AddressId == addressId);
+
+            if (customerAddress == null)
+                throw new Exception("Address not found or does not belong to this user.");
+
+            // rimuove il collegamento
+            // NON cancella la riga dalla tabella Address perché potrebbe essere referenziata da ordini vecchi.
+            // l'indirizzo sparisce dalla lista "I miei indirizzi".
+            _context.CustomerAddresses.Remove(customerAddress);
+
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

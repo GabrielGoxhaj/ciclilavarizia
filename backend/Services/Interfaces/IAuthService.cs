@@ -10,5 +10,7 @@ namespace backend.Services.Interfaces
         Task<bool> IsEmailAvailableAsync(string email);
         Task<int> CreateCredentialsAsync(CustomerRegistrationDto dto);
         Task<ApiResponse<AuthResponseDto>> Login(UserLoginDto dto);
+        Task<bool> ChangePasswordAsync(int userId, string oldPassword, string newPassword);
+        Task UpdateLoginCredentialsAsync(int userId, string newEmail, string newUsername);
     }
 }
