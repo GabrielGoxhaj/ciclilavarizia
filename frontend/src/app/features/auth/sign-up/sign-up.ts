@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule, FormGroup } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -13,6 +13,10 @@ import { passwordStrengthValidator } from '../../../core/validators/password-str
 import { EmailValidators } from '../../../core/validators/unique-email.validator';
 import { conditionalRequiredGroupValidator } from '../../../core/validators/optional-group.validator';
 import { CustomerRegistrationRequest, AddressDto } from '../../../shared/models/auth.model';
+import { MatDialog } from '@angular/material/dialog';
+import { LoginComponent } from '../../../core/components/login/login';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-sign-up',
@@ -20,12 +24,12 @@ import { CustomerRegistrationRequest, AddressDto } from '../../../shared/models/
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    RouterLink,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatCheckboxModule
+    MatCheckboxModule,
+    MatProgressSpinner,
   ],
   templateUrl: './sign-up.html',
 })
@@ -33,50 +37,91 @@ export class SignUpComponent {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private dialog = inject(MatDialog);
+  private toastService = inject(ToastService);
 
   isLoading = signal(false);
   errorMessage = signal('');
 
   registrationForm = this.fb.group({
-    personalInfo: this.fb.group({
+    personalInfo: this.fb.group(
+      {
         firstName: ['', Validators.required],
         lastName: ['', Validators.required],
-        username: ['', Validators.required], 
+        username: ['', Validators.required],
         email: [
-            '',
-            [Validators.required, Validators.email],
-            [EmailValidators.createUniqueEmailValidator(this.authService)],
+          '',
+          [Validators.required, Validators.email],
+          [EmailValidators.createUniqueEmailValidator(this.authService)],
         ],
-        phone: ['', [Validators.pattern(/^\+?[0-9 \-\(\)]*$/), Validators.minLength(7), Validators.maxLength(25)]],
+        phone: [
+          '',
+          [
+            Validators.pattern(/^\+?[0-9 \-\(\)]*$/),
+            Validators.minLength(7),
+            Validators.maxLength(25),
+          ],
+        ],
         password: ['', [Validators.required, Validators.minLength(8), passwordStrengthValidator()]],
         confirmPassword: ['', Validators.required],
-    }, { validators: matchPasswordValidator('password', 'confirmPassword') }),
-    
-    address: this.fb.group({
+      },
+      { validators: matchPasswordValidator('password', 'confirmPassword') }
+    ),
+
+    address: this.fb.group(
+      {
         addressLine1: [''],
         city: [''],
         stateProvince: [''],
         postalCode: [''],
         countryRegion: [''],
-    }, { validators: conditionalRequiredGroupValidator(['addressLine1', 'city', 'postalCode', 'countryRegion']) })
+      },
+      {
+        validators: conditionalRequiredGroupValidator([
+          'addressLine1',
+          'city',
+          'postalCode',
+          'countryRegion',
+        ]),
+      }
+    ),
   });
 
-  get personalInfo() { return this.registrationForm.get('personalInfo') as FormGroup; }
-  get addressGroup() { return this.registrationForm.get('address') as FormGroup; }
+  get personalInfo() {
+    return this.registrationForm.get('personalInfo') as FormGroup;
+  }
+  get addressGroup() {
+    return this.registrationForm.get('address') as FormGroup;
+  }
 
   get passwordErrorMessage(): string {
     const control = this.personalInfo.get('password');
     if (control?.hasError('required')) return 'La password è obbligatoria';
     if (control?.hasError('minlength')) return 'Minimo 8 caratteri';
     if (control?.hasError('passwordStrength')) {
-        const err = control.errors!['passwordStrength'];
-        const missing = [];
-        if (!err.hasUpperCase) missing.push('Maiuscola');
-        if (!err.hasLowerCase) missing.push('Minuscola');
-        if (!err.hasNumeric) missing.push('Numero');
-        return 'Mancante: ' + missing.join(', ');
+      const err = control.errors!['passwordStrength'];
+      const missing = [];
+      if (!err.hasUpperCase) missing.push('Maiuscola');
+      if (!err.hasLowerCase) missing.push('Minuscola');
+      if (!err.hasNumeric) missing.push('Numero');
+      return 'Mancante: ' + missing.join(', ');
     }
     return '';
+  }
+
+  openLoginDialog() {
+    const dialogRef = this.dialog.open(LoginComponent, {
+      width: '400px',
+      maxWidth: '90vw',
+      autoFocus: false,
+      panelClass: 'custom-dialog-container',
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result === true) {
+        this.router.navigate(['/']);
+      }
+    });
   }
 
   onSubmit() {
@@ -94,42 +139,44 @@ export class SignUpComponent {
 
     const addresses: AddressDto[] = [];
     if (addr.addressLine1?.trim()) {
-        addresses.push({
-            addressType: 'Shipping',
-            addressLine1: addr.addressLine1!,
-            city: addr.city!,
-            stateProvince: addr.stateProvince || undefined,
-            postalCode: addr.postalCode!,
-            countryRegion: addr.countryRegion!
-        });
+      addresses.push({
+        addressType: 'Shipping',
+        addressLine1: addr.addressLine1!.trim(),
+        city: addr.city!.trim(),
+        stateProvince: addr.stateProvince?.trim() || undefined,
+        postalCode: addr.postalCode!.trim(),
+        countryRegion: addr.countryRegion!.trim(),
+      });
     }
 
     const payload: CustomerRegistrationRequest = {
-        firstName: info.firstName!,
-        lastName: info.lastName!,
-        email: info.email!,
-        username: info.username!, 
-        password: info.password!,
-        phone: info.phone || undefined,
-        addresses: addresses.length > 0 ? addresses : undefined
+      firstName: info.firstName!.trim(),
+      lastName: info.lastName!.trim(),
+      email: info.email!.trim(),
+      username: info.username!.trim(),
+      password: info.password!,
+      phone: info.phone?.trim() ? info.phone.trim() : undefined,
+      addresses: addresses.length > 0 ? addresses : undefined,
     };
 
     this.authService.register(payload).subscribe({
-        next: (res) => {
-            console.log('Registered', res);
-            this.authService.login({ email: payload.email, password: payload.password }).subscribe({
-                next: () => this.router.navigate(['/']),
-                error: () => {
-                    this.isLoading.set(false);
-                    this.router.navigate(['/login']);
-                }
-            });
-        },
-        error: (err) => {
-            console.error(err);
+      next: (res) => {
+        console.log('Registered', res);
+        this.authService.login({ email: payload.email, password: payload.password }).subscribe({
+          next: () => {
+            this.toastService.success('Registrazione effettuata con successo', `Benvenuto ${payload.username}!`);
+            this.router.navigate(['/']);
+          },
+          error: () => {
             this.isLoading.set(false);
-            this.errorMessage.set(err.error?.message || 'Registration failed. Please try again.');
-        }
+            this.router.navigate(['/login']);
+          },
+        });
+      },
+      error: (err) => {
+        console.error(err);
+        this.isLoading.set(false);
+      },
     });
   }
 }

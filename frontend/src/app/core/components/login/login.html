@@ -57,15 +57,6 @@
       <span class="flex items-center gap-2"> Accesso in corso... </span>
       } @else { Accedi }
     </button>
-
-    @if (errorMessage()) {
-    <div
-      class="mt-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-200 flex items-center gap-2 animate-pulse"
-    >
-      <mat-icon class="text-sm h-5 w-5 text-red-600!">error</mat-icon>
-      <span>{{ errorMessage() }}</span>
-    </div>
-    }
   </form>
 
   <div class="mt-6 text-center text-sm text-gray-500">

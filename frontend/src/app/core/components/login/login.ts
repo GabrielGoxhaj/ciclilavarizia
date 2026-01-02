@@ -34,7 +34,6 @@ export class LoginComponent {
   errorMessage = signal<string | null>(null);
   private toastService = inject(ToastService);
 
-  // Form Definition
   signInForm = this.fb.group({
     email: ['claudio.orloffo@example.com', [Validators.required, Validators.email]], 
     password: ['On1off0!', Validators.required],
@@ -60,16 +59,12 @@ export class LoginComponent {
         } else {
             console.warn('Login fallito (logico):', response);
             this.isLoading.set(false);
-            const msg = response.message || 'Credenziali non valide';
             this.toastService.error('Credenziali non valide', 'Errore di Accesso');
-            this.errorMessage.set(msg);
         }
       },
       error: (err) => { // 500, 404, ecc.
         console.error('Errore HTTP:', err);
         this.isLoading.set(false);
-        this.toastService.error('Si è verificato un errore imprevisto', 'Errore');
-        this.errorMessage.set('Si è verificato un errore imprevisto.');
       },
     });
   }

@@ -20,7 +20,6 @@ export class CustomerService {
   }
 
   createAddress(address: CreateAddressRequest): Observable<ApiResponse<Address>> {
-    // Nota: baseUrl include già /customers, quindi aggiungiamo solo /addresses
     return this.http.post<ApiResponse<Address>>(`${this.baseUrl}/addresses`, address);
   }
 

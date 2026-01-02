@@ -6,7 +6,7 @@ export const routes: Routes = [
   { path: '', loadComponent: () => import('./pages/home/home').then((m) => m.HomeComponent) },
   {
     path: 'profile',
-    canActivate: [authGuard], 
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./features/profile/profile-layout/profile-layout').then(
         (m) => m.ProfileLayoutComponent
@@ -25,6 +25,20 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/profile/order-detail/order-detail').then(
             (m) => m.OrderDetailComponent
+          ),
+      },
+      {
+        path: 'details',
+        loadComponent: () =>
+          import('./features/profile/profile-details/profile-details').then(
+            (m) => m.ProfileDetailsComponent
+          ),
+      },
+          {
+        path: 'addresses', 
+        loadComponent: () =>
+          import('./features/profile/user-addresses/user-addresses').then(
+            (m) => m.UserAddressesComponent
           ),
       },
     ],

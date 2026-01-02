@@ -4,15 +4,15 @@ export interface CreateOrderDetail {
 }
 
 export interface CreateOrderRequest {
-  addressId: number; 
-  paymentMethod?: string; 
+  addressId: number;
+  paymentMethod?: string;
   items: CreateOrderDetail[];
 }
 
 export interface OrderDetail {
+  thumbnailUrl: string | undefined;
   productId: number;
   productName: string;
-  thumbnailUrl?: string;
   quantity: number;
   unitPrice: number;
   discount: number;
@@ -21,7 +21,7 @@ export interface OrderDetail {
 
 // response
 export interface Order {
-  salesOrderId: number; 
+  salesOrderId: number;
   customerId: number;
   orderDate: string;
   status: number;

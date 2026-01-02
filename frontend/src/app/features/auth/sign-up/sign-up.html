@@ -2,8 +2,11 @@
     <div class="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">Crea il tuo account</h2>
         <p class="mt-2 text-center text-sm text-gray-600">
-            o <a routerLink="/login" class="font-semibold text-(--mat-sys-primary) cursor-pointer">accedi al tuo account
-                esistente</a>
+            o 
+            <a (click)="openLoginDialog()" 
+               class="font-semibold text-(--mat-sys-primary) cursor-pointer hover:underline">
+               accedi al tuo account esistente
+            </a>
         </p>
     </div>
 
@@ -11,25 +14,24 @@
         <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
             <form [formGroup]="registrationForm" (ngSubmit)="onSubmit()" class="space-y-6">
 
-                <!-- personal info -->
                 <div formGroupName="personalInfo" class="space-y-4">
                     <div class="grid grid-cols-1 gap-y-4 gap-x-4 sm:grid-cols-2">
                         <mat-form-field appearance="outline" class="w-full">
                             <mat-label>Nome</mat-label>
-                            <input matInput formControlName="firstName" placeholder="John">
-                            <mat-error>Required</mat-error>
+                            <input matInput formControlName="firstName">
+                            <mat-error>Il nome è obbligatorio</mat-error>
                         </mat-form-field>
 
                         <mat-form-field appearance="outline" class="w-full">
                             <mat-label>Cognome</mat-label>
-                            <input matInput formControlName="lastName" placeholder="Doe">
-                            <mat-error>Required</mat-error>
+                            <input matInput formControlName="lastName">
+                            <mat-error>Il cognome è obbligatorio</mat-error>
                         </mat-form-field>
                     </div>
 
                     <mat-form-field appearance="outline" class="w-full">
                         <mat-label>Username</mat-label>
-                        <input matInput formControlName="username" placeholder="johndoe123">
+                        <input matInput formControlName="username">
                         @if (personalInfo.get('username')?.hasError('required')) {
                         <mat-error>Username richiesto</mat-error>
                         }
@@ -37,7 +39,7 @@
 
                     <mat-form-field appearance="outline" class="w-full">
                         <mat-label>Indirizzo Email</mat-label>
-                        <input matInput formControlName="email" type="email" placeholder="john@example.com">
+                        <input matInput formControlName="email" type="email">
                         @if (personalInfo.get('email')?.hasError('required')) {
                         <mat-error>Indirizzo email richiesto</mat-error>
                         }
@@ -74,59 +76,56 @@
 
                 <div class="border-t border-gray-200 my-4"></div>
 
-                <!-- shipping address (opt) -->
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Indirizzo di Spedizione <span
-                        class="text-gray-400 text-sm font-normal">(Opzionale)</span></h3>
+                <h3 class="text-lg font-medium text-gray-900 mb-4">
+                    Indirizzo di Spedizione <span class="text-gray-400 text-sm font-normal">(Opzionale)</span>
+                </h3>
 
-                <div formGroupName="address" class="space-y-4">
+                <div formGroupName="address" class="space-y-3">
+                    
                     <mat-form-field appearance="outline" class="w-full">
-                        <mat-label>Via/Piazza</mat-label>
+                        <mat-label>Indirizzo (Via/Piazza)</mat-label>
                         <input matInput formControlName="addressLine1">
                     </mat-form-field>
 
-                    <div class="grid grid-cols-2 gap-4">
-                        <mat-form-field appearance="outline" class="w-full">
+                    <div class="flex gap-4">
+                        <mat-form-field appearance="outline" class="flex-1">
                             <mat-label>Città</mat-label>
                             <input matInput formControlName="city">
                         </mat-form-field>
 
-                        <mat-form-field appearance="outline" class="w-full">
-                            <mat-label>Codice Postale</mat-label>
+                        <mat-form-field appearance="outline" class="w-32">
+                            <mat-label>CAP</mat-label>
                             <input matInput formControlName="postalCode">
                         </mat-form-field>
                     </div>
 
-                    <mat-form-field appearance="outline" class="w-full">
-                        <mat-label>Stato</mat-label>
-                        <input matInput formControlName="countryRegion">
-                    </mat-form-field>
+                    <div class="flex gap-4">
+                        <mat-form-field appearance="outline" class="flex-1">
+                            <mat-label>Provincia</mat-label>
+                            <input matInput formControlName="stateProvince">
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="flex-1">
+                            <mat-label>Paese</mat-label>
+                            <input matInput formControlName="countryRegion">
+                        </mat-form-field>
+                    </div>
 
                     @if (addressGroup.hasError('incompleteGroup') && addressGroup.touched) {
-                    <mat-error class="text-sm block">
-                        Per favore compila tutti i campi dell'indirizzo o lasciali vuoti.
-                    </mat-error>
+                    <div class="text-sm text-red-800 -mt-3">
+                        Per favore compila tutti i campi obbligatori dell'indirizzo o lasciali tutti vuoti
+                    </div>
                     }
                 </div>
 
-                <!-- error msg server -->
-                @if (errorMessage()) {
-                <div class="rounded-md bg-red-50 p-4 border border-red-200">
-                    <div class="flex">
-                        <div class="shrink-0">
-                            <mat-icon class="text-red-400 w-5! h-5! text-sm">error</mat-icon>
-                        </div>
-                        <div class="ml-3">
-                            <h3 class="text-sm font-medium text-red-800">{{ errorMessage() }}</h3>
-                        </div>
-                    </div>
-                </div>
-                }
-
-                <div>
+                <div class="mt-6">
                     <button type="submit" mat-flat-button color="primary" class="w-full py-6! text-lg!"
                         [disabled]="registrationForm.invalid || isLoading()">
                         @if(isLoading()) {
-                        <span class="flex items-center gap-2">Creazione account in corso...</span>
+                        <span class="flex items-center gap-2">
+                            <mat-spinner diameter="20" color="accent"></mat-spinner>
+                            Creazione account...
+                        </span>
                         } @else {
                         Crea Account
                         }
