@@ -1,0 +1,73 @@
+<div class="max-w-xl">
+    <div class="mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-2">Cambia password</h2>
+        <p class="text-sm text-gray-600">
+            Utilizza il modulo qui di seguito per modificare la password del tuo account.
+            Scegli una password forte e non utilizzarla per altri account.
+        </p>
+    </div>
+
+    <form [formGroup]="passwordForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
+
+        <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Password attuale</mat-label>
+            <input matInput [type]="hideOld() ? 'password' : 'text'" formControlName="oldPassword">
+            
+            <button mat-icon-button matSuffix (click)="hideOld.set(!hideOld())" type="button">
+                <mat-icon>{{hideOld() ? 'visibility_off' : 'visibility'}}</mat-icon>
+            </button>
+            
+            @if (passwordForm.get('oldPassword')?.hasError('required')) {
+                <mat-error>Inserisci la tua password attuale</mat-error>
+            }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Nuova password</mat-label>
+            <input matInput [type]="hideNew() ? 'password' : 'text'" formControlName="newPassword">
+            
+            <button mat-icon-button matSuffix (click)="hideNew.set(!hideNew())" type="button">
+                <mat-icon>{{hideNew() ? 'visibility_off' : 'visibility'}}</mat-icon>
+            </button>
+
+            <mat-error>{{ passwordErrorMessage }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Conferma nuova password</mat-label>
+            <input matInput [type]="hideConfirm() ? 'password' : 'text'" formControlName="confirmNewPassword">
+            
+            <button mat-icon-button matSuffix (click)="hideConfirm.set(!hideConfirm())" type="button">
+                <mat-icon>{{hideConfirm() ? 'visibility_off' : 'visibility'}}</mat-icon>
+            </button>
+
+            @if (passwordForm.hasError('passwordMismatch')) {
+                <mat-error>Le password non coincidono</mat-error>
+            }
+        </mat-form-field>
+
+        <div class="mt-4">
+            <button mat-flat-button color="primary" type="submit" 
+                    class="w-full sm:w-auto py-6! text-base!"
+                    [disabled]="passwordForm.invalid || isLoading()">
+                @if (isLoading()) {
+                    <span class="flex items-center gap-2">
+                        <mat-spinner diameter="20" color="accent"></mat-spinner>
+                        Salvataggio in corso...
+                    </span>
+                } @else {
+                    Salva modifiche
+                }
+            </button>
+        </div>
+
+    </form>
+
+    <div class="mt-8 p-4 bg-blue-50 border border-blue-100 rounded-lg flex items-start gap-3">
+        <mat-icon class="text-blue-600 shrink-0">info</mat-icon>
+        <div class="text-sm text-blue-900">
+            <p class="font-bold mb-1">Proteggi il tuo account</p>
+            <p>Se noti attività insolite o sospetti che il tuo account sia stato compromesso, contatta subito l'assistenza.</p>
+        </div>
+    </div>
+</div>

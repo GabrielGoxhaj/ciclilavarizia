@@ -34,11 +34,18 @@ export const routes: Routes = [
             (m) => m.ProfileDetailsComponent
           ),
       },
-          {
-        path: 'addresses', 
+      {
+        path: 'addresses',
         loadComponent: () =>
           import('./features/profile/user-addresses/user-addresses').then(
             (m) => m.UserAddressesComponent
+          ),
+      },
+      {
+        path: 'security',
+        loadComponent: () =>
+          import('./features/profile/profile-security/profile-security').then(
+            (m) => m.ProfileSecurityComponent
           ),
       },
     ],
