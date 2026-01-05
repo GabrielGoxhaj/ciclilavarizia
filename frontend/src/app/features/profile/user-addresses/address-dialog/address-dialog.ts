@@ -83,8 +83,15 @@ export class AddressDialogComponent {
 
   save() {
     if (this.addressForm.valid) {
-      // ritorna i dati al componente padre
-      this.dialogRef.close(this.addressForm.getRawValue());
+      const formValue = this.addressForm.getRawValue();
+
+      const finalData = {
+        ...formValue,
+        // gestione provincia vuota, analogo a quanto avviene nel checkout
+        stateProvince: formValue.stateProvince?.trim() ? formValue.stateProvince : 'N/A', 
+      };
+
+      this.dialogRef.close(finalData);
     }
   }
 
