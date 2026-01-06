@@ -143,9 +143,9 @@ export default class ProductListComponent implements OnInit {
     if (params['size']) filters.size = params['size'];
 
     // aggiorna paginazione e ordinamento se presenti nell'URL
-    this.currentPage.set(Number(params['page']) || 1); 
+    this.currentPage.set(Number(params['page']) || 1);
     this.currentSort.set(params['sort'] || 'name_asc');
-    if (params['pageSize']) this.pageSize.set(Number(params['pageSize']));
+    this.pageSize.set(Number(params['pageSize']) || 20);
 
     this.currentFilters.set(filters);
   }
@@ -159,7 +159,7 @@ export default class ProductListComponent implements OnInit {
       size: filters.size || null,
       page: page > 1 ? page : null, // nascondi page=1
       sort: sort !== 'name_asc' ? sort : null, // nascondi sort default
-      pageSize: pageSize !== 20 ? pageSize : null, 
+      pageSize: pageSize !== 20 ? pageSize : null,
     };
 
     this.router.navigate([], {
