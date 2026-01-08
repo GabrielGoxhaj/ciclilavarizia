@@ -55,9 +55,8 @@ import { environment } from '../../../../environments/environment';
 
         <div class="text-right min-w-20">
           <div class="font-bold text-lg text-gray-900">
-            {{ item().listPrice * item().quantity | currency : 'EUR' }}
+            {{ item().listPrice * item().quantity * 1.22 | currency : 'EUR' }}
           </div>
-          <div class="text-[10px] text-gray-400 uppercase tracking-wide">IVA Escl.</div>
         </div>
 
         <button
