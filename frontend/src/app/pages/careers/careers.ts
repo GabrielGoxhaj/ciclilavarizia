@@ -19,7 +19,7 @@ export class CareersComponent {
       maxWidth: '95vw',
       data: {
         // Replace with your actual Google Form embed URL
-        url: 'https://docs.google.com/forms/d/e/1FAIpQLSdEXAMPLE_FORM_ID/viewform?embedded=true'
+        url: 'https://docs.google.com/forms/d/e/1FAIpQLScwq-iHraj_X2wMw_KY2U7lea1WxgOCbODEZ2hflb_Ezkak2w/viewform?embedded=true',
       }
     });
   }
