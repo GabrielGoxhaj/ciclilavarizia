@@ -35,7 +35,8 @@ body {
   margin: 0;
 }
 
-:root {
+:root {  
+  --mat-sys-surface: #ffffff;  
   --color-primary: var(--mat-sys-primary);
   --color-primary-dark: var(--mat-sys-primary-container);
   --color-primary-light: var(--mat-sys-surface-variant);
