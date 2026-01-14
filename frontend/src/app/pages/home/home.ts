@@ -34,8 +34,8 @@ export class HomeComponent implements OnInit {
 
   private loadCategories(): void {
     const desired = [
-      { key: 'bici', label: 'Bici', keywords: ['bici', 'bike', 'bikes', 'bicycle', 'bicycles'] },
-      { key: 'accessori', label: 'Accessori', keywords: ['accessori', 'accessories', 'accessory'] },
+      { key: 'bici', label: 'Bici', keywords: ['mountain bikes'] },
+      { key: 'telai', label: 'Telai', keywords: ['touring frames'] },
       { key: 'jerseys', label: 'Jerseys', keywords: ['jersey', 'jerseys', 'maglia', 'maglie'] },
     ];
 
@@ -98,7 +98,7 @@ export class HomeComponent implements OnInit {
         console.error('Error loading categories', err);
         this.categories = [
           { productCategoryId: 'all', name: 'Bici', image: this.placeholder('Bici') },
-          { productCategoryId: 'all', name: 'Accessori', image: this.placeholder('Accessori') },
+          { productCategoryId: 'all', name: 'Telai', image: this.placeholder('Telai') },
           { productCategoryId: 'all', name: 'Jerseys', image: this.placeholder('Jerseys') },
         ];
       },
