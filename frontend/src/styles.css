@@ -20,6 +20,11 @@ body {
     border-right: none !important;
 }
 
+.custom-badge .mat-badge-content {
+    background-color: #f97316 !important; /* Esempio: Arancione */
+    color: white;
+}
+
 .mat-mdc-form-field {
     background-color: white;
 }

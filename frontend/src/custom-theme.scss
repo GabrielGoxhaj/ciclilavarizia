@@ -9,9 +9,9 @@
 html {
   @include mat.theme((
     color: (
-      primary: mat.$azure-palette,
+      primary: mat.$red-palette,
       tertiary: mat.$blue-palette,
-      warn: mat.$azure-palette,
+      warn: mat.$red-palette,
     ),
     typography: Roboto,
     density: 0,

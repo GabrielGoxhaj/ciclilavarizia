@@ -1,8 +1,12 @@
 <div class="flex items-center gap-2">
   <a mat-icon-button routerLink="/cart" aria-label="Vai al carrello"
     class="flex! items-center! justify-center! text-white! hover:bg-white/10" matTooltip="Vai al Carrello">
-    <mat-icon [matBadge]="cartService.count()" [matBadgeHidden]="cartService.count() === 0" aria-hidden="false"
-      class="text-white!">shopping_cart</mat-icon>
+   <mat-icon 
+    [matBadge]="cartService.count()" 
+    [matBadgeHidden]="cartService.count()==0"
+    class="custom-badge text-white!">
+    shopping_cart
+</mat-icon>
   </a>
   @if(authService.currentUser(); as user) {
   <button mat-icon-button [matMenuTriggerFor]="userMenu" aria-label="Menu utente" matTooltip="Menu utente"
@@ -34,12 +38,12 @@
   } @else {
   <div class="flex items-center gap-2">
     <div class="flex items-center gap-2">
-      <button matButton="filled" (click)="openLogin()" aria-label="Accedi al sito" matTooltip="Accedi al sito">
+      <button matButton="filled" color="primary" (click)="openLogin()" aria-label="Accedi al sito" matTooltip="Accedi al sito">
         Login
       </button>
     </div>
     <div class="relative group">
-      <a matButton="elevated" routerLink="/signup" aria-label="Registrati al sito" matTooltip="Registrati al sito">
+      <a matButton="elevated" color="primary" routerLink="/signup" aria-label="Registrati al sito" matTooltip="Registrati al sito">
         Registrati
       </a>
     </div>
