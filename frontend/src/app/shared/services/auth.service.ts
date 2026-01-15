@@ -25,6 +25,7 @@ export class AuthService {
 
   isLoggedIn = computed(() => !!this.currentUser());
   currentRole = computed(() => this.currentUser()?.role);
+  isAdmin = computed(() => this.currentRole() === 'Admin'); 
 
   constructor() {
     this.restoreSession();

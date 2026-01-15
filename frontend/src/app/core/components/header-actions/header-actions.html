@@ -21,6 +21,13 @@
       <span class="text-xs text-gray-500">{{ user.email }}</span>
     </div>
     <mat-divider></mat-divider>
+      @if (authService.isAdmin()) {
+    <button mat-menu-item routerLink="/admin" class="text-red-600!">
+      <mat-icon class="text-red-600!">admin_panel_settings</mat-icon>
+      <span>Amministrazione</span>
+    </button>
+    <mat-divider></mat-divider>
+  }
     <button mat-menu-item routerLink="/profile/details">
       <mat-icon>person</mat-icon>
       <span>Il mio profilo</span>
