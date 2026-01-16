@@ -74,7 +74,7 @@
   <!-- Featured Products Section -->
   <section class="py-16 px-8 bg-gray-50">
     <h2 class="text-2xl font-extrabold mb-12 text-gray-900 text-center">Featured</h2>
-    <div class="grid gap-8 grid-cols-1 md:grid-cols-2 max-w-7xl mx-auto">
+    <div class="grid gap-8 grid-cols-1 md:grid-cols-2 max-w-2xl mx-auto">
       @for (product of featuredProducts; track product.productId) {
       <app-product-card [product]="product" [viewMode]="'grid'"></app-product-card>
       }
