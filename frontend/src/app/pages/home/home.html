@@ -10,14 +10,14 @@
         Ride with confidence
       </h1>
       <p class="text-lg md:text-xl mb-8 opacity-95 text-white font-light hero-sub">
-        Find your perfect MTB
+        Trova la tua MTB perfetta
       </p>
 
       <div class="flex items-center gap-4">
         <a
           routerLink="/products"
           class="inline-block bg-white text-black py-3 md:py-4 px-6 md:px-8 text-base md:text-lg font-semibold rounded-md uppercase tracking-wider transition transform hover:-translate-y-1 hover:shadow-2xl shadow-white/20"
-          >Shop now</a
+          >Compra ora</a
         >
       </div>
     </div>
@@ -40,7 +40,7 @@
 
   <!-- Categories Section -->
   <section class="py-16 px-8 max-w-7xl mx-auto">
-    <h2 class="text-2xl font-extrabold mb-12 text-slate-900">Shop by category</h2>
+    <h2 class="text-2xl font-extrabold mb-12 text-slate-900">Visualizza per categoria</h2>
     <div class="grid gap-8 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
       @for (category of categories; track category.productCategoryId) {
       <a [routerLink]="['/products/category', category.productCategoryId]" class="block">
@@ -86,19 +86,19 @@
     class="bg-gradient-to-br from-(--mat-sys-primary) to-red-400 text-white py-16 px-8 text-center"
   >
     <div class="max-w-xl mx-auto">
-      <h2 class="text-2xl text-white mb-4">Subscribe to our newsletter</h2>
-      <p class="text-lg mb-6 opacity-95 text-white">Get the latest news and exclusive offers</p>
+      <h2 class="text-2xl text-white mb-4">Iscriviti alla nostra newsletter</h2>
+      <p class="text-lg mb-6 opacity-95 text-white">Ricevi le ultime notizie e offerte esclusive</p>
       <div class="flex gap-2 justify-center mt-6">
         <input
           type="email"
-          placeholder="Enter your email"
+          placeholder="Inserisci la tua email"
           required
           class="flex-1 p-4 rounded-md bg-white text-slate-900"
         />
         <button
           class="bg-white text-black py-3 px-8 rounded-md font-semibold uppercase tracking-wider hover:-translate-y-0.5 transition"
         >
-          Subscribe
+          Iscriviti
         </button>
       </div>
     </div>
